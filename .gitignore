@@ -1,0 +1,43 @@
+# NDS Files
+NSNDY/
+*.nds
+*.sav
+baks/
+melonDS.ini
+
+# Mics things
+Utils/
+
+# Patch
+*.xdelta
+
+# NCPatcher stuff
+ncp_ide.h
+ncp.h
+ncpatcher
+ncprt.c
+ncpatcher.json
+log.txt
+arm9.json
+buildrules.txt
+convert_sdk.py
+build/
+backup/
+
+# Nitro stuff
+nitro/
+nitro_wl/
+nnsys/
+nitro.h
+nnsys.h
+nitro_sp.h
+nitro_win32.h
+
+# macOS
+.DS_Store
+
+# Scripts
+*.py
+*.sh
+.vscode/c_cpp_properties.json
+A01_1.bak.bin
