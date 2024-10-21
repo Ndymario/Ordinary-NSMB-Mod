@@ -77,4 +77,5 @@ private:
 	static void goalBarrier_hook(void* goal, ActiveCollider* other);
 	static void oamLoad_hook();
 	static void doNotUpdateSomeDbObjPltt_hook(void* stage);
+	static bool applyPowerup_hook(PlayerBase* player, PowerupState powerup);
 };

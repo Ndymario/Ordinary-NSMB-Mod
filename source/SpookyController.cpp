@@ -12,6 +12,7 @@ static Player* getLeftmostPlayer();
 bool Game_addPlayerCoin_backup(s32 playerID);
 void Game_addPlayerScore_backup(s32 playerID, s32 count);
 void GoalFlag_onPoleBarrierCollided_backup(void* goal, ActiveCollider* other);
+bool applyPowerup_backup(PlayerBase* player, PowerupState powerup);
 
 asm(R"(
 	GoalFlag_updateGoalGrab = 0x0213042C
@@ -362,6 +363,17 @@ void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
 	func20BE084(stage);
 }
 
+ncp_jump(0x0212b9f8, 11)
+bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState powerup)
+{
+	if (instance->isSpooky){
+		instance->onBlockHit();
+		return true;
+	} else {
+		return applyPowerup_backup(player, powerup);
+	}
+}
+
 // ------------ Backups ------------
 
 NTR_NAKED bool Game_addPlayerCoin_backup(s32 playerID) {asm(R"(
@@ -378,6 +390,12 @@ NTR_NAKED void GoalFlag_onPoleBarrierCollided_backup(void* goal, ActiveCollider*
 	SUB     SP, SP, #0x10
 	B       0x021307C4
 )");}
+
+NTR_NAKED bool applyPowerup_backup(PlayerBase* player, PowerupState powerup)
+{asm(R"(
+        stmdb	sp!,{lr}
+        B       0x0212b9fc
+    )");}
 
 // ------------ Utils ------------
 
