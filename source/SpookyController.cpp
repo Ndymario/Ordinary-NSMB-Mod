@@ -158,6 +158,7 @@ void SpookyController::chaseState() {
     	deathTimer = 1200;
     	suspenseTime = 900;
 		isSpooky = true;
+		SND::playSFXUnique(380);
 		spawnChaser();
 		updateStep = 1;
 		return;

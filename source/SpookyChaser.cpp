@@ -40,8 +40,6 @@ s32 Chaser::onCreate() {
 
 	moveTowardsPlayer();
 
-	SND::playSFXUnique(380);
-
     return 1;
 }
 
