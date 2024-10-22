@@ -48,6 +48,7 @@ private:
 	s32 transitionDuration;
 	bool usingSpookyPalette;
 
+	u16 colorBackup;
 	u16* paletteBackup; // Contains the normal palette
 
 	NSBTX staticNsbtx;
