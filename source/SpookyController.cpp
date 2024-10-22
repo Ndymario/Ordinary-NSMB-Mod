@@ -380,6 +380,11 @@ bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState poweru
 	}
 }
 
+ncp_hook(0x02118fb4, 10)
+void SpookyController::playerBeginEnteranceTransition_hook(Player* player, EntranceType type){
+	instance->unspookyPalette();
+}
+
 // ------------ Backups ------------
 
 NTR_NAKED bool Game_addPlayerCoin_backup(s32 playerID) {asm(R"(
