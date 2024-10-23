@@ -122,9 +122,12 @@ void SpookyController::transitionState() {
 	if (updateStep == Func::Init) {
         isRenderingStatic = true;
         Stage::freezeFlag = 1;
-		// colorBackup = NNS_G3dGlb.lightColor[0];
-		// NNS_G3dGeColor(scast<GXRgb>(0));
-		//u32 color = makeMonochrome(NNS_G3dGlb.lightColor[0]);
+
+		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
+			Stage::setZoom(4096.0, 0, i, 0);
+			Game::getPlayer(i)->updateLocked = true;
+		}
+
         transitionDuration = 10 + Wifi::getRandom() % (50 - 10 + 1);
         spookTimer = transitionDuration;
         updateStep = 1;
@@ -132,11 +135,19 @@ void SpookyController::transitionState() {
 	}
 	if (updateStep == Func::Exit) {
 		isRenderingStatic = false;
+		
+		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
+			Game::getPlayer(i)->updateLocked = false;
+		}
+
 		Stage::freezeFlag = 0;
+
 		return;
 	}
 
 	if (spookTimer > 0) {
+		Stage::freezeFlag = 1;
+		
 		if (spookTimer == transitionDuration / 2) {
 			if (usingSpookyPalette) {
 				unspookyPalette();
@@ -165,6 +176,7 @@ void SpookyController::chaseState() {
 		SND::pauseBGM(true);
 		SND::playSFXUnique(380);
 		spawnChaser();
+
 		updateStep = 1;
 		return;
 	}
@@ -420,15 +432,6 @@ static u16* getOBJExtPltt(u32 destSlotAddr) {
 
 static u16* getTexPltt(u32 destSlotAddr) {
 	return rcast<u16*>(*rcast<u32*>(0x02094280) + destSlotAddr);
-}
-
-static u32 makeMonochrome(u32 color) {
-	u16 r, g, b;
-  	r = (color >> 0) & 0x31;
-  	g = (color >> 5) & 0x31;
-  	b = (color >> 10) & 0x31;
-	u32 gray = (scast<u32>(r) + scast<u32>(g) + scast<u32>(b)) / 3;
-	return (gray << 10) | (gray << 5) | gray;
 }
 
 static u16 makeMonochrome(u16 color) {
