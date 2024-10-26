@@ -17,8 +17,8 @@ private:
 
     ModelAnm bodyModel;
     const static u32 bodyID = 1881 - 131;
-    //const static u32 bodyAnimationID = 1893 - 131;
-    const static u32 bodyAnimationID = 1892 - 131;
+    const static u32 bodyAnimationID = 1893 - 131;
+    //const static u32 bodyAnimationID = 1892 - 131;
     Vec3 bodyScale;
 
 	void moveTowardsPlayer();
@@ -47,5 +47,7 @@ public:
     static constexpr u16 updatePriority = objectID;
     static constexpr u16 renderPriority = objectID;
     static constexpr ActorProfile profile = {&constructObject<Chaser>, updatePriority, renderPriority, loadResources};
+    
     Player* closestPlayer;
+    bool bossMode;
 };

@@ -8,38 +8,43 @@ The "chaser" is the sp00ky Mario that the player can see chasing them when sp00k
 ncp_over(0x020C619C, 0) const ObjectInfo objectInfo = Chaser::objectInfo; //Stage Actor ID 192
 ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::profile; //objectID 92
 
+static GXOamAttr** PowerupOAMs = rcast<GXOamAttr**>(0x0212F0D8);
+
 bool Chaser::loadResources() {
     FS::Cache::loadFile(headID, true); // Luigi head
     FS::Cache::loadFile(bodyID, true); // Luigi body
-    FS::Cache::loadFile(bodyAnimationID, true); // Luigi body animations
+    //FS::Cache::loadFile(bodyAnimationID, true); // Luigi body animations
     return true;
 }
 
 // Code that runs the first time the Actor loads in
 s32 Chaser::onCreate() {
-	loadResources();
-
 	ctrl = SpookyController::getInstance();
+	bossMode = false;//Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal;
 
-    // Model stuff
-    void* headFile = FS::Cache::getFile(headID);
-    void* bodyFile = FS::Cache::getFile(bodyID);
-    void* bodyAnmFile = FS::Cache::getFile(bodyAnimationID);
+    if (!bossMode) {
+	    loadResources();
 
-    headModel.create(headFile, 0, 0);
-    headScale = Vec3(1.0fx, 1.0fx, 1.0fx);
+        // Model stuff
+        void* headFile = FS::Cache::getFile(headID);
+        void* bodyFile = FS::Cache::getFile(bodyID);
+        void* bodyAnmFile = FS::Cache::getFile(bodyAnimationID);
 
-    bodyModel.create(bodyFile, bodyAnmFile, 0, 0, 0);
-    //bodyModel.init(34, FrameCtrl::Looping, 1.0fx, 0);
-    bodyModel.init(1, FrameCtrl::Looping, 1.0fx, 0);
-    bodyScale = Vec3(2.0fx, 2.0fx, 2.0fx);
+        headModel.create(headFile, 0, 0);
+        headScale = Vec3(1.0fx, 1.0fx, 1.0fx);
 
-    viewOffset = Vec2(50, 50);
-    activeSize = Vec2(500.0, 1000.0);
+        bodyModel.create(bodyFile, bodyAnmFile, 0, 0, 0);
+        bodyModel.init(34, FrameCtrl::Looping, 1.0fx, 0);
+        //bodyModel.init(1, FrameCtrl::Looping, 1.0fx, 0);
+        bodyScale = Vec3(2.0fx, 2.0fx, 2.0fx);
 
-    scale = Vec3(2.0fx, 2.0fx, 2.0fx);
+        viewOffset = Vec2(50, 50);
+        activeSize = Vec2(500.0, 1000.0);
 
-    rotation = Vec3s(0fx, 4fx, 0fx);
+        scale = Vec3(2.0fx, 2.0fx, 2.0fx);
+
+        rotation = Vec3s(0fx, 4fx, 0fx);
+    }
 
 	moveTowardsPlayer();
 
@@ -48,7 +53,9 @@ s32 Chaser::onCreate() {
 
 // Code that runs every frame
 bool Chaser::updateMain() {
-    bodyModel.update();
+    if (!bossMode) {
+        bodyModel.update();
+    }
 
 	moveTowardsPlayer();
 
@@ -56,8 +63,10 @@ bool Chaser::updateMain() {
 
     if (ctrl->deathTimer <= 0) {
         closestPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
-		headModel.disableRendering();
-		bodyModel.disableRendering();
+        if (!bossMode) {
+		    headModel.disableRendering();
+		    bodyModel.disableRendering();
+        }
 		ctrl->deathTimer = 0;
     }
 
@@ -79,21 +88,26 @@ void Chaser::moveTowardsPlayer() {
 }
 
 s32 Chaser::onRender() {
-    // Render the body at the correct location with the correct rotation
-    MTX::identity(bodyModel.matrix);
-    MTX::translate(bodyModel.matrix, position);
-    MTX::rotate(bodyModel.matrix, rotation);
-    Game::modelMatrix = bodyModel.matrix;
-    bodyModel.render(&bodyScale);
+    if (!bossMode) {
+        // Render the body at the correct location with the correct rotation
+        MTX::identity(bodyModel.matrix);
+        MTX::translate(bodyModel.matrix, position);
+        MTX::rotate(bodyModel.matrix, rotation);
+        Game::modelMatrix = bodyModel.matrix;
+        bodyModel.render(&bodyScale);
 
-    // Put the head on node 15 (the head node)
-        // This would apply the pitch to the head model if I could get the math right...
-    // MTX::identity(headModel.matrix);
-    // MTX::rotateX(headModel.matrix, headPitch);
-    bodyModel.getNodeMatrix(15, &headModel.matrix);
-    MTX::rotateY(headModel.matrix, headYaw);
-    MTX::rotateZ(headModel.matrix, headPitch);
-    headModel.render(&headScale);
+        // Put the head on node 15 (the head node)
+            // This would apply the pitch to the head model if I could get the math right...
+        // MTX::identity(headModel.matrix);
+        // MTX::rotateX(headModel.matrix, headPitch);
+        bodyModel.getNodeMatrix(15, &headModel.matrix);
+        MTX::rotateY(headModel.matrix, headYaw);
+        MTX::rotateZ(headModel.matrix, headPitch);
+        headModel.render(&headScale);
+    } else {
+        Vec2 oamScale(scale.x, scale.y);
+        OAM::drawSprite(PowerupOAMs[0], position.x, position.y, OAM::Flags::None, 0, 3, &oamScale, 0, nullptr, OAM::Settings::None);
+    }
     return 1;
 }
 

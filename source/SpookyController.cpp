@@ -41,7 +41,6 @@ void SpookyController::onCreate() {
 	usingSpookyPalette = false;
 	isRenderingStatic = false;
 	isSpooky = false;
-	bossMode = false;
 
 	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256];
 
@@ -96,6 +95,13 @@ void SpookyController::onDestroy() {
 	// 	chaser->Base::destroy();
 	// 	delete chaser;
 	// }
+}
+
+void SpookyController::onAreaChange() {
+	onPrepareResources();
+	if (isSpooky) {
+		spookyPalette();
+	}
 }
 
 void SpookyController::onBlockHit() {
@@ -192,32 +198,12 @@ void SpookyController::chaseState() {
 		return;
 	}
 
-	if(bossMode){
-		deathTimer--;
-		if(deathTimer <= 0){
-			deathTimer = 0;
-			for (s32 i = 0; i < Game::getPlayerCount(); i++) {
-				Player* player = Game::getPlayer(i);
-				player->damage(*player, 0, 0, PlayerDamageType::Death);
-			}
-		}
-	}
-
-	if (chaser == nullptr && !bossMode) { // Assume area change
-		onPrepareResources();
-		spookyPalette();
-		if (Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
-			bossMode = true;
-		} else {
-			spawnChaser();
-		}
+	if (chaser == nullptr) {
+		spawnChaser();
 	}
 }
 
 void SpookyController::spawnChaser() {
-	if(bossMode){
-		return;
-	}
 	Player* leftmostPlayer = getLeftmostPlayer();
     chaser = scast<Chaser*>(Actor::spawnActor(92, 0, &leftmostPlayer->position)); // Spawn the chaser actor
 }
@@ -314,6 +300,8 @@ void SpookyController::stageSetup_hook() {
 	if (instance == nullptr) {
 		instance = new SpookyController();
 		instance->onCreate();
+	} else {
+		instance->onAreaChange();
 	}
 }
 
@@ -339,12 +327,14 @@ void SpookyController::stageDestroy_hook() {
 
 ncp_hook(0x0209E7D0, 0)
 void SpookyController::hitBlock_hook() {
-	instance->onBlockHit();
+	if (instance != nullptr) {
+		instance->onBlockHit();
+	}
 }
 
 ncp_jump(0x02020354)
 bool SpookyController::getCoin_hook(s32 playerID) {
-	if (instance->isSpooky) {
+	if (instance != nullptr && instance->isSpooky) {
 		if (Game::playerCoins[playerID] > 0) {
 			Game::playerCoins[playerID]--;
 			return true;
@@ -358,7 +348,7 @@ bool SpookyController::getCoin_hook(s32 playerID) {
 
 ncp_jump(0x02020300)
 void SpookyController::getScore_hook(s32 playerID, s32 count) {
-	if (instance->isSpooky) {
+	if (instance != nullptr && instance->isSpooky) {
 		if ((playerID & 0xFFFFFFFE) == 0) {
 			s32 newScore = Game::playerScore[playerID] - count;
 			if (newScore < 0) {
@@ -374,7 +364,7 @@ void SpookyController::getScore_hook(s32 playerID, s32 count) {
 
 ncp_call(0x021302C8, 12)
 bool SpookyController::goalGrab_hook(void* goal) {
-	if (instance->isSpooky) {
+	if (instance != nullptr && instance->isSpooky) {
 		return false;
 	}
 	return GoalFlag_updateGoalGrab(goal);
@@ -382,7 +372,7 @@ bool SpookyController::goalGrab_hook(void* goal) {
 
 ncp_jump(0x021307C0, 12)
 void SpookyController::goalBarrier_hook(void* goal, ActiveCollider* other) {
-	if (!instance->isSpooky) {
+	if (instance != nullptr && !instance->isSpooky) {
 		GoalFlag_onPoleBarrierCollided_backup(goal, other);
 	}
 }
@@ -397,7 +387,7 @@ void SpookyController::oamLoad_hook() {
 
 ncp_call(0x020C0530, 0)
 void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
-	if (instance->isSpooky || instance->isRenderingStatic) {
+	if (instance != nullptr && (instance->isSpooky || instance->isRenderingStatic)) {
 		return;
 	}
 	func20BE084(stage);
@@ -406,18 +396,11 @@ void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
 ncp_jump(0x0212b9f8, 11)
 bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState powerup)
 {
-	if (instance->isSpooky){
+	if (instance != nullptr && instance->isSpooky){
 		instance->onBlockHit();
 		return true;
 	} else {
 		return applyPowerup_backup(player, powerup);
-	}
-}
-
-ncp_hook(0x02118fb4, 10)
-void SpookyController::playerBeginEnteranceTransition_hook(Player* player, EntranceType type){
-	if(instance != nullptr){
-		instance->unspookyPalette();
 	}
 }
 
