@@ -41,3 +41,4 @@ nitro_win32.h
 *.sh
 .vscode/c_cpp_properties.json
 A01_1.bak.bin
+.vscode/launch.json

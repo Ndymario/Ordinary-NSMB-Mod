@@ -41,6 +41,7 @@ void SpookyController::onCreate() {
 	usingSpookyPalette = false;
 	isRenderingStatic = false;
 	isSpooky = false;
+	bossMode = false;
 
 	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256];
 
@@ -64,7 +65,7 @@ void SpookyController::onUpdate() {
 
 void SpookyController::onRender() {
 	if (isRenderingStatic) {
-		Vec3 scale(0x1000);
+		Vec3 scale(1fx);
 		Vec3 cameraPos = Vec3(0, 0, 512.0fx);
 		fx32 cameraPosXStart = Stage::cameraX[Game::localPlayerID];
 		fx32 cameraPosYStart = -Stage::cameraY[Game::localPlayerID] - 64.0fx;
@@ -90,6 +91,11 @@ void SpookyController::onDestroy() {
 	if (paletteBackup != nullptr) {
 		delete[] paletteBackup;
 	}
+
+	// if (chaser != nullptr) {
+	// 	chaser->Base::destroy();
+	// 	delete chaser;
+	// }
 }
 
 void SpookyController::onBlockHit() {
@@ -115,16 +121,13 @@ void SpookyController::waitSpawnChaserState() {
 	}
 }
 
-asm("setMain3dLightType = 0x020a3ad8");
-extern "C" void setMain3dLightType(u8 a);
-
 void SpookyController::transitionState() {
 	if (updateStep == Func::Init) {
         isRenderingStatic = true;
         Stage::freezeFlag = 1;
 
 		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
-			Stage::setZoom(4096.0, 0, i, 0);
+			Stage::setZoom(1.0fx, 0, i, 0);
 			Game::getPlayer(i)->updateLocked = true;
 		}
 
@@ -180,6 +183,7 @@ void SpookyController::chaseState() {
 		updateStep = 1;
 		return;
 	}
+
 	if (updateStep == Func::Exit) {
 		if (chaser != nullptr) {
 			chaser->Base::destroy();
@@ -188,14 +192,32 @@ void SpookyController::chaseState() {
 		return;
 	}
 
-	if (chaser == nullptr) { // Assume area change
+	if(bossMode){
+		deathTimer--;
+		if(deathTimer <= 0){
+			deathTimer = 0;
+			for (s32 i = 0; i < Game::getPlayerCount(); i++) {
+				Player* player = Game::getPlayer(i);
+				player->damage(*player, 0, 0, PlayerDamageType::Death);
+			}
+		}
+	}
+
+	if (chaser == nullptr && !bossMode) { // Assume area change
 		onPrepareResources();
 		spookyPalette();
-		spawnChaser();
+		if (Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
+			bossMode = true;
+		} else {
+			spawnChaser();
+		}
 	}
 }
 
 void SpookyController::spawnChaser() {
+	if(bossMode){
+		return;
+	}
 	Player* leftmostPlayer = getLeftmostPlayer();
     chaser = scast<Chaser*>(Actor::spawnActor(92, 0, &leftmostPlayer->position)); // Spawn the chaser actor
 }
@@ -288,7 +310,7 @@ static const StageLight newViewLightingTable[] = {
 // ------------ Hooks ------------
 
 ncp_hook(0x0215ECA8, 54)
-void SpookyController::stageSetup_hook() {
+void SpookyController::stageSetup_hook() {	
 	if (instance == nullptr) {
 		instance = new SpookyController();
 		instance->onCreate();
@@ -394,7 +416,9 @@ bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState poweru
 
 ncp_hook(0x02118fb4, 10)
 void SpookyController::playerBeginEnteranceTransition_hook(Player* player, EntranceType type){
-	instance->unspookyPalette();
+	if(instance != nullptr){
+		instance->unspookyPalette();
+	}
 }
 
 // ------------ Backups ------------

@@ -30,6 +30,7 @@ s32 Chaser::onCreate() {
     headScale = Vec3(1.0fx, 1.0fx, 1.0fx);
 
     bodyModel.create(bodyFile, bodyAnmFile, 0, 0, 0);
+    //bodyModel.init(34, FrameCtrl::Looping, 1.0fx, 0);
     bodyModel.init(1, FrameCtrl::Looping, 1.0fx, 0);
     bodyScale = Vec3(2.0fx, 2.0fx, 2.0fx);
 
@@ -37,6 +38,8 @@ s32 Chaser::onCreate() {
     activeSize = Vec2(500.0, 1000.0);
 
     scale = Vec3(2.0fx, 2.0fx, 2.0fx);
+
+    rotation = Vec3s(0fx, 4fx, 0fx);
 
 	moveTowardsPlayer();
 
@@ -69,7 +72,7 @@ void Chaser::moveTowardsPlayer() {
     if (ctrl->deathTimer >= ctrl->suspenseTime) {
         newXPos = closestPlayer->position.x - ctrl->deathTimer * 1.0fx;
     } else {
-        newXPos = closestPlayer->position.x - ctrl->deathTimer * 0.25fx;
+        newXPos = closestPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
     }
 
     position = Vec3(newXPos, closestPlayer->position.y, closestPlayer->position.z);

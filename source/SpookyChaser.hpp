@@ -17,10 +17,13 @@ private:
 
     ModelAnm bodyModel;
     const static u32 bodyID = 1881 - 131;
+    //const static u32 bodyAnimationID = 1893 - 131;
     const static u32 bodyAnimationID = 1892 - 131;
     Vec3 bodyScale;
 
 	void moveTowardsPlayer();
+
+    fx32 playerBuffer = 14fx;
 
 public:
     static bool loadResources();

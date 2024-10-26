@@ -64,6 +64,8 @@ public:
     s32 deathTimer;   // Timer that anchors the behavior of the actor so it's not too RNG
     s32 suspenseTime;     // The time that triggers "suspense" mode
 
+	bool bossMode = false;	// Fall back to a less resource-heavy sp00ky mode for Bowser fights to avoid a crash
+
 private:
 	// Hooks
 	static void stageSetup_hook();
