@@ -1,0 +1,17 @@
+rom_header NSNDY/header.bin
+arm9_entry KEEP
+arm9_load KEEP
+arm7_entry KEEP
+arm7_load KEEP
+fnt NSNDY/fnt.bin
+file_mode ADJUST
+arm9 NSNDY/arm9.bin
+arm7 NSNDY/arm7.bin
+arm9ovt NSNDY/arm9ovt.bin
+arm7ovt NSNDY/arm7ovt.bin
+icon NSNDY/banner.bin
+rsa_sig NSNDY/rsasig.bin
+data NSNDY/root
+ovt_repl_flag 0xFF
+ov9 NSNDY/overlay9
+ov7 NSNDY/overlay7

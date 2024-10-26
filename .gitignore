@@ -16,10 +16,7 @@ ncp_ide.h
 ncp.h
 ncpatcher
 ncprt.c
-ncpatcher.json
 log.txt
-arm9.json
-buildrules.txt
 convert_sdk.py
 build/
 backup/
@@ -35,6 +32,7 @@ nitro_win32.h
 
 # macOS
 .DS_Store
+Thumbs.db
 
 # Scripts
 *.py
