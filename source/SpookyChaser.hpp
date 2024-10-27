@@ -2,6 +2,7 @@
 
 #include "nsmb.hpp"
 #include "nsmb_nitro.hpp"
+#include "NSBTX.hpp"
 
 class SpookyController;
 
@@ -9,24 +10,13 @@ class Chaser: public StageEntity {
 private:
 	SpookyController* ctrl;
 
-    Model headModel;
-    const static u32 headID = 1878 - 131;
-    Vec3 headScale;
-    fx16 headPitch = 0;
-    fx16 headYaw = 0;
-
-    ModelAnm bodyModel;
-    const static u32 bodyID = 1881 - 131;
-    const static u32 bodyAnimationID = 1893 - 131;
-    //const static u32 bodyAnimationID = 1892 - 131;
-    Vec3 bodyScale;
-
 	void moveTowardsPlayer();
 
     fx32 playerBuffer = 14fx;
 
 public:
     static bool loadResources();
+    virtual bool onPrepareResources() override;
     virtual s32 onCreate() override;
 
     virtual bool updateMain() override;
@@ -49,5 +39,5 @@ public:
     static constexpr ActorProfile profile = {&constructObject<Chaser>, updatePriority, renderPriority, loadResources};
     
     Player* closestPlayer;
-    bool bossMode;
+    NSBTX spookyNsbtx;
 };

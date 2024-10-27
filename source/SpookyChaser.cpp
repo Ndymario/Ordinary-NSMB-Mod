@@ -1,5 +1,5 @@
 /*
-The "chaser" is the sp00ky Mario that the player can see chasing them when sp00ky mode is activated.
+The "chaser" is the sp00ky Luigi that the player can see chasing them when sp00ky mode is activated.
 */
 
 #include "SpookyChaser.hpp"
@@ -8,65 +8,38 @@ The "chaser" is the sp00ky Mario that the player can see chasing them when sp00k
 ncp_over(0x020C619C, 0) const ObjectInfo objectInfo = Chaser::objectInfo; //Stage Actor ID 192
 ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::profile; //objectID 92
 
-static GXOamAttr** PowerupOAMs = rcast<GXOamAttr**>(0x0212F0D8);
+bool Chaser::onPrepareResources(){
+    void* nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+	spookyNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
+    return 1;
+}
 
 bool Chaser::loadResources() {
-    FS::Cache::loadFile(headID, true); // Luigi head
-    FS::Cache::loadFile(bodyID, true); // Luigi body
-    //FS::Cache::loadFile(bodyAnimationID, true); // Luigi body animations
     return true;
 }
 
 // Code that runs the first time the Actor loads in
 s32 Chaser::onCreate() {
 	ctrl = SpookyController::getInstance();
-	bossMode = false;//Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal;
 
-    if (!bossMode) {
-	    loadResources();
+    onPrepareResources();
+	loadResources();
 
-        // Model stuff
-        void* headFile = FS::Cache::getFile(headID);
-        void* bodyFile = FS::Cache::getFile(bodyID);
-        void* bodyAnmFile = FS::Cache::getFile(bodyAnimationID);
-
-        headModel.create(headFile, 0, 0);
-        headScale = Vec3(1.0fx, 1.0fx, 1.0fx);
-
-        bodyModel.create(bodyFile, bodyAnmFile, 0, 0, 0);
-        bodyModel.init(34, FrameCtrl::Looping, 1.0fx, 0);
-        //bodyModel.init(1, FrameCtrl::Looping, 1.0fx, 0);
-        bodyScale = Vec3(2.0fx, 2.0fx, 2.0fx);
-
-        viewOffset = Vec2(50, 50);
-        activeSize = Vec2(500.0, 1000.0);
-
-        scale = Vec3(2.0fx, 2.0fx, 2.0fx);
-
-        rotation = Vec3s(0fx, 4fx, 0fx);
-    }
-
-	moveTowardsPlayer();
+    viewOffset = Vec2(50, 50);
+    activeSize = Vec2(500.0, 1000.0);
 
     return 1;
 }
 
 // Code that runs every frame
 bool Chaser::updateMain() {
-    if (!bossMode) {
-        bodyModel.update();
-    }
-
+    spookyNsbtx.setTexture(0);
 	moveTowardsPlayer();
 
     ctrl->deathTimer -= 1;
 
     if (ctrl->deathTimer <= 0) {
         closestPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
-        if (!bossMode) {
-		    headModel.disableRendering();
-		    bodyModel.disableRendering();
-        }
 		ctrl->deathTimer = 0;
     }
 
@@ -74,40 +47,21 @@ bool Chaser::updateMain() {
 }
 
 void Chaser::moveTowardsPlayer() {
-    fx32 newXPos;
-
 	closestPlayer = getClosestPlayer(nullptr, nullptr);
 
     if (ctrl->deathTimer >= ctrl->suspenseTime) {
-        newXPos = closestPlayer->position.x - ctrl->deathTimer * 1.0fx;
+        position.x = closestPlayer->position.x - ctrl->deathTimer * 1.0fx;
     } else {
-        newXPos = closestPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
+        position.x = closestPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
     }
 
-    position = Vec3(newXPos, closestPlayer->position.y, closestPlayer->position.z);
+    position.y = closestPlayer->position.y;
+    position.z = closestPlayer->position.z;
 }
 
 s32 Chaser::onRender() {
-    if (!bossMode) {
-        // Render the body at the correct location with the correct rotation
-        MTX::identity(bodyModel.matrix);
-        MTX::translate(bodyModel.matrix, position);
-        MTX::rotate(bodyModel.matrix, rotation);
-        Game::modelMatrix = bodyModel.matrix;
-        bodyModel.render(&bodyScale);
-
-        // Put the head on node 15 (the head node)
-            // This would apply the pitch to the head model if I could get the math right...
-        // MTX::identity(headModel.matrix);
-        // MTX::rotateX(headModel.matrix, headPitch);
-        bodyModel.getNodeMatrix(15, &headModel.matrix);
-        MTX::rotateY(headModel.matrix, headYaw);
-        MTX::rotateZ(headModel.matrix, headPitch);
-        headModel.render(&headScale);
-    } else {
-        Vec2 oamScale(scale.x, scale.y);
-        OAM::drawSprite(PowerupOAMs[0], position.x, position.y, OAM::Flags::None, 0, 3, &oamScale, 0, nullptr, OAM::Settings::None);
-    }
+    Vec3 scale(1fx);
+    spookyNsbtx.render(position, scale);
     return 1;
 }
 
