@@ -45,12 +45,11 @@ struct TextEntry
 };
 
 const static TextEntry textEntries[] = {
-	TextEntry(COLOR_AQUA, 0, 5, 3, "The game has crashed"),
+	TextEntry(COLOR_AQUA, 0, 1, 3, "Uh oh, the game has crashed :("),
 	TextEntry(COLOR_WHITE, 0, 2, 6, "Please contact the dev team"),
-	TextEntry(COLOR_WHITE, 0, 4, 7, "Send them the crash dump"),
-	TextEntry(COLOR_WHITE, 0, 7, 10, "Discord contacts:"),
-	TextEntry(COLOR_WHITE, 0, 11, 14, "@ndymario"),
-	TextEntry(COLOR_YELLOW, 0, 10, 19, "ndygoof"),
+	TextEntry(COLOR_WHITE, 0, 3, 8, "and send the crash dump"),
+	TextEntry(COLOR_WHITE, 0, 7, 12, "Discord contacts:"),
+	TextEntry(COLOR_YELLOW, 0, 5, 14, "Ndymario | @ndymario"),
 
 	TextEntry(COLOR_AQUA, 1, 2, 4, "Possible actions:"),
 	TextEntry(COLOR_WHITE, 1, 4, 7, "START  > This screen"),

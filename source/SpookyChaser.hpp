@@ -12,7 +12,7 @@ private:
 
 	void moveTowardsPlayer();
 
-    fx32 playerBuffer = 14fx;
+    fx32 playerBuffer = 40fx;
 
 public:
     static bool loadResources();
@@ -40,4 +40,5 @@ public:
     
     Player* closestPlayer;
     NSBTX spookyNsbtx;
+    u8 texID = 0;
 };

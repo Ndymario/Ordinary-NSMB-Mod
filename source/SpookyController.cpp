@@ -13,6 +13,8 @@ bool Game_addPlayerCoin_backup(s32 playerID);
 void Game_addPlayerScore_backup(s32 playerID, s32 count);
 void GoalFlag_onPoleBarrierCollided_backup(void* goal, ActiveCollider* other);
 bool applyPowerup_backup(PlayerBase* player, PowerupState powerup);
+bool startSeq_backup(s32 seqID, bool restart);
+void startStageThemeSeq_backup(s32 seqID);
 
 asm(R"(
 	GoalFlag_updateGoalGrab = 0x0213042C
@@ -90,11 +92,6 @@ void SpookyController::onDestroy() {
 	if (paletteBackup != nullptr) {
 		delete[] paletteBackup;
 	}
-
-	// if (chaser != nullptr) {
-	// 	chaser->Base::destroy();
-	// 	delete chaser;
-	// }
 }
 
 void SpookyController::onAreaChange() {
@@ -385,7 +382,7 @@ void SpookyController::oamLoad_hook() {
 	OAM::load();
 }
 
-ncp_call(0x020C0530, 0)
+ncp_call(0x020C0530, main)
 void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
 	if (instance != nullptr && (instance->isSpooky || instance->isRenderingStatic)) {
 		return;
@@ -403,6 +400,24 @@ bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState poweru
 		return applyPowerup_backup(player, powerup);
 	}
 }
+
+// ncp_jump(0x02011f04)
+// void SpookyController::startStageThemeSeq_hook(s32 seqID){
+// 	if (instance != nullptr && instance->isSpooky){
+// 		return;
+// 	} else {
+// 		startStageThemeSeq_backup(seqID);
+// 	}
+// }
+
+// ncp_jump(0x02011e7c)
+// bool SpookyController::startSeq_hook(s32 seqID, bool restart){
+// 	if (instance != nullptr && instance->isSpooky){
+// 		return;
+// 	} else {
+// 		return startSeq_backup(seqID, restart);
+// 	}
+// }
 
 // ------------ Backups ------------
 
@@ -425,6 +440,18 @@ NTR_NAKED bool applyPowerup_backup(PlayerBase* player, PowerupState powerup)
 {asm(R"(
         stmdb	sp!,{lr}
         B       0x0212b9fc
+    )");}
+
+NTR_NAKED void startStageThemeSeq_backup(s32 seqID)
+{asm(R"(
+        stmdb	sp!,{lr}
+        B       0x02011f08
+    )");}
+
+NTR_NAKED bool startSeq_backup(s32 seqID, bool restart)
+{asm(R"(
+        stmdb	sp!,{lr}
+        B       0x02011e80
     )");}
 
 // ------------ Utils ------------

@@ -80,5 +80,7 @@ private:
 	static void oamLoad_hook();
 	static void doNotUpdateSomeDbObjPltt_hook(void* stage);
 	static bool applyPowerup_hook(PlayerBase* player, PowerupState powerup);
+	static bool startSeq_hook(s32 seqID, bool restart);
+	static void startStageThemeSeq_hook(s32 seqID);
 	static void playerBeginEnteranceTransition_hook(Player* player, EntranceType type);
 };

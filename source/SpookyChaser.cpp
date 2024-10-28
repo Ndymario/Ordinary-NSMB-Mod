@@ -9,7 +9,7 @@ ncp_over(0x020C619C, 0) const ObjectInfo objectInfo = Chaser::objectInfo; //Stag
 ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::profile; //objectID 92
 
 bool Chaser::onPrepareResources(){
-    void* nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+    void* nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
 	spookyNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
     return 1;
 }
@@ -33,7 +33,11 @@ s32 Chaser::onCreate() {
 
 // Code that runs every frame
 bool Chaser::updateMain() {
-    spookyNsbtx.setTexture(0);
+    spookyNsbtx.setTexture(texID);
+    spookyNsbtx.setPalette(texID);
+    if(ctrl->deathTimer % 10 == 0){
+        texID = (texID + 1) % 6;
+    }
 	moveTowardsPlayer();
 
     ctrl->deathTimer -= 1;
@@ -55,7 +59,7 @@ void Chaser::moveTowardsPlayer() {
         position.x = closestPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
     }
 
-    position.y = closestPlayer->position.y;
+    position.y = closestPlayer->position.y - 16fx;
     position.z = closestPlayer->position.z;
 }
 
