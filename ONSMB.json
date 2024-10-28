@@ -1,0 +1,970 @@
+{
+    "0": [
+        {
+            "text": "Created By",
+            "y": 57.0,
+            "palette": "Red",
+            "multipage": false,
+            "start_page": 0,
+            "end_page": 0
+        },
+        {
+            "text": "Ndymario",
+            "y": 95.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 0,
+            "end_page": 0
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "1": [
+        {
+            "text": "Programmers",
+            "y": 57.0,
+            "palette": "Red",
+            "multipage": false,
+            "start_page": 1,
+            "end_page": 1
+        },
+        {
+            "text": "TheGameratorT",
+            "y": 105.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 1,
+            "end_page": 1
+        },
+        {
+            "text": "Ndymario",
+            "y": 85.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 1,
+            "end_page": 1
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "2": [
+        {
+            "text": "Graphics",
+            "y": 57.0,
+            "palette": "Red",
+            "multipage": false,
+            "start_page": 2,
+            "end_page": 2
+        },
+        {
+            "text": "Slugmotif",
+            "y": 95.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 2,
+            "end_page": 2
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "3": [
+        {
+            "text": "Illy",
+            "y": 105.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 3,
+            "end_page": 3
+        },
+        {
+            "text": "Frosty Cake",
+            "y": 87.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 3,
+            "end_page": 3
+        },
+        {
+            "text": "Mosquito",
+            "y": 123.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 3,
+            "end_page": 3
+        },
+        {
+            "text": "Mr. Ztardust",
+            "y": 141.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 3,
+            "end_page": 3
+        },
+        {
+            "text": "Beta Testers",
+            "y": 58.0,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 3,
+            "end_page": 4
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "4": [
+        {
+            "text": "Beta Testers",
+            "y": 58.0,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 3,
+            "end_page": 4
+        },
+        {
+            "text": "SeanM",
+            "y": 87.0,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 4,
+            "end_page": 4
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "5": [
+        {
+            "text": "Will Smith - Lighting Code",
+            "y": 87,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 5,
+            "end_page": 5
+        },
+        {
+            "text": "Garhoogan - NitroPaint",
+            "y": 105,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 5,
+            "end_page": 5
+        },
+        {
+            "text": "Special Thanks",
+            "y": 58,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 5,
+            "end_page": 6
+        },
+        {
+            "text": "TheGameratorT - Support",
+            "y": 123,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 5,
+            "end_page": 5
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "6": [
+        {
+            "text": "Special Thanks",
+            "y": 58,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 5,
+            "end_page": 6
+        },
+        {
+            "text": "You - The Player",
+            "y": 87,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 6,
+            "end_page": 6
+        },
+        {
+            "text": "NSMB Central",
+            "y": 105,
+            "palette": "Blue",
+            "multipage": false,
+            "start_page": 6,
+            "end_page": 6
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "7": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "8": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "9": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "10": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "11": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "12": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "13": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "14": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "15": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "16": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "17": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "18": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "19": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "20": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "21": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "22": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "23": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "24": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "25": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "26": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "27": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "28": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "29": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "30": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "31": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "32": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "33": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "34": [
+        {
+            "text": "Thanks for playing",
+            "y": 95,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "Join the Central Discord",
+            "y": 160.0,
+            "palette": "Blue",
+            "multipage": true,
+            "start_page": 7,
+            "end_page": 34
+        },
+        {
+            "text": "An Ordinary NSMB Mod",
+            "y": 25,
+            "palette": "Red",
+            "multipage": true,
+            "start_page": 0,
+            "end_page": 34
+        }
+    ],
+    "35": [],
+    "36": []
+}
