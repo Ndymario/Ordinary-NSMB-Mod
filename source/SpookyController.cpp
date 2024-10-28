@@ -382,7 +382,7 @@ void SpookyController::oamLoad_hook() {
 	OAM::load();
 }
 
-ncp_call(0x020C0530, main)
+ncp_call(0x020C0530, 0)
 void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
 	if (instance != nullptr && (instance->isSpooky || instance->isRenderingStatic)) {
 		return;
