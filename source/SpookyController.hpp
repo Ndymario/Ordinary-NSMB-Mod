@@ -6,6 +6,10 @@
 #include "SpookyChaser.hpp"
 #include "NSBTX.hpp"
 
+#include "lighting/extralighting.hpp"
+
+using namespace Lighting;
+
 class SpookyController {
 private:
     inline SpookyController() = default;  // Private constructor to prevent multiple instances
@@ -64,6 +68,11 @@ public:
 
     s32 deathTimer;   // Timer that anchors the behavior of the actor so it's not too RNG
     s32 suspenseTime;     // The time that triggers "suspense" mode
+
+	bool changeLighting();
+	
+	static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
+	static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
 private:
 	// Hooks

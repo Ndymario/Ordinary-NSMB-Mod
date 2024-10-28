@@ -2,12 +2,17 @@
 
 #include "nsmb/system/function.hpp"
 
+using namespace Lighting;
+
 static u16* getBGExtPltt(u32 destSlotAddr);
 static u16* getOBJExtPltt(u32 destSlotAddr);
 static u16* getTexPltt(u32 destSlotAddr);
 static u16 makeMonochrome(u16 color);
 static void makeRangeMonochrome(u16* startAddr, u32 count);
 static Player* getLeftmostPlayer();
+
+static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
+static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
 bool Game_addPlayerCoin_backup(s32 playerID);
 void Game_addPlayerScore_backup(s32 playerID, s32 count);
@@ -35,7 +40,7 @@ SpookyController* SpookyController::getInstance() {
 }
 
 void SpookyController::onPrepareResources() {
-	void* nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+	void* nsbtxFile = FS::Cache::loadFile(2088 - 131, false);
 	staticNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
 }
 
@@ -97,6 +102,7 @@ void SpookyController::onDestroy() {
 void SpookyController::onAreaChange() {
 	onPrepareResources();
 	if (isSpooky) {
+		setLightingFromProfile(11);
 		spookyPalette();
 	}
 }
@@ -166,9 +172,11 @@ void SpookyController::transitionState() {
 		if (usingSpookyPalette) {
 			usingSpookyPalette = false;
 			SND::pauseBGM(false);
+			setLightingFromProfile(0);
 			switchState(&SpookyController::waitSpawnChaserState);
 		} else {
 			usingSpookyPalette = true;
+			setLightingFromProfile(11);
 			switchState(&SpookyController::chaseState);
 		}
 	}
@@ -276,19 +284,6 @@ void SpookyController::switchState(void (SpookyController::*updateFunc)()) {
 		this->updateFunc(this);
 	}
 }
-
-/*struct StageLight {
-	VecFx16 direction;
-	GXRgb color;
-	GXRgb diffuse;
-	GXRgb ambient;
-	GXRgb emission;
-};
-
-ncp_over(0x020C2544, 0)
-static const StageLight newViewLightingTable[] = {
-	{ {0, -1.0fxs, -1.0fxs}, GX_RGB(15, 15, 15), GX_RGB(31, 31, 31), GX_RGB(0, 0, 0), GX_RGB(0, 0, 0) }
-};*/
 
 // ------------ Hooks ------------
 
@@ -494,4 +489,45 @@ static Player* getLeftmostPlayer() {
     }
 
     return leftmostPlayer;
+}
+
+void SpookyController::lerpColor(GXRgb& color, GXRgb target, fx32 step) {
+
+	if (color == target) return;
+
+	u16 c[3];
+	for (u32 i=0; i<3; i++) {
+		c[i] = color >> i*5 & 31;
+		c[i] = Math::mul((target >> i*5 & 31) - c[i], step) + c[i];
+	}
+	color = GX_RGB(c[0],c[1],c[2]);
+}
+
+void SpookyController::lerpLighting(StageLighting& current, const StageLighting& target, fx32 step) {
+
+	for (u32 i=0; i<4; i++) {
+		DirLight& light = current.lights[i];
+		const DirLight& tLight = target.lights[i];
+		
+		if (!light.active) {
+			if (tLight.active) light.active = true;
+			else continue;			
+		}		
+
+		lerpColor(light.color, tLight.color, step);
+
+		Vec3 vec = Vec3(light.direction);
+		vec.lerp(Vec3(tLight.direction),step);
+		vec = vec.normalize();
+
+		NNS_G3dGlbLightColor(scast<GXLightId>(i),light.color);
+		NNS_G3dGlbLightVector(scast<GXLightId>(i),vec.x,vec.y,vec.z);
+	}
+
+	lerpColor(current.diffuse, target.diffuse, step);
+	lerpColor(current.ambient, target.ambient, step);
+	lerpColor(current.emission, target.emission, step);
+	lerpColor(current.specular, target.specular, step);
+
+	setMatLighting(current);
 }
