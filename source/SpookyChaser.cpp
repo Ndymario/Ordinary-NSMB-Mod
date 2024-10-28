@@ -10,6 +10,7 @@ ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::pro
 
 bool Chaser::onPrepareResources(){
     void* nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
+    texID = 0;
 	spookyNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
     return 1;
 }
@@ -26,7 +27,7 @@ s32 Chaser::onCreate() {
 	loadResources();
 
     viewOffset = Vec2(50, 50);
-    activeSize = Vec2(500.0, 1000.0);
+    activeSize = Vec2(1000.0, 3000.0);
 
     return 1;
 }
@@ -35,7 +36,7 @@ s32 Chaser::onCreate() {
 bool Chaser::updateMain() {
     spookyNsbtx.setTexture(texID);
     spookyNsbtx.setPalette(texID);
-    if(ctrl->deathTimer % 10 == 0){
+    if(ctrl->deathTimer % 5 == 0){
         texID = (texID + 1) % 6;
     }
 	moveTowardsPlayer();
