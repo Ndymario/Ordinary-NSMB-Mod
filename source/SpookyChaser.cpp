@@ -29,6 +29,8 @@ s32 Chaser::onCreate() {
     viewOffset = Vec2(50, 50);
     activeSize = Vec2(1000.0, 3000.0);
 
+    resetMusic = true;
+
     return 1;
 }
 
@@ -62,6 +64,12 @@ void Chaser::moveTowardsPlayer() {
 
     position.y = closestPlayer->position.y - 16fx;
     position.z = closestPlayer->position.z;
+    
+    if(resetMusic){
+        SND::pauseBGM(true);
+        SND::playSFXUnique(380);
+        resetMusic = false;
+    }
 }
 
 s32 Chaser::onRender() {

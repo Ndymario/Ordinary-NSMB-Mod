@@ -41,4 +41,5 @@ public:
     Player* closestPlayer;
     NSBTX spookyNsbtx;
     u8 texID = 0;
+    bool resetMusic;
 };

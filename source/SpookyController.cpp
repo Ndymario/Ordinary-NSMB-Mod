@@ -102,7 +102,6 @@ void SpookyController::onDestroy() {
 void SpookyController::onAreaChange() {
 	onPrepareResources();
 	if (isSpooky) {
-		setLightingFromProfile(11);
 		spookyPalette();
 	}
 }
@@ -187,12 +186,14 @@ void SpookyController::chaseState() {
     	deathTimer = 1200;
     	suspenseTime = 900;
 		isSpooky = true;
-		SND::pauseBGM(true);
-		SND::playSFXUnique(380);
 		spawnChaser();
 
 		updateStep = 1;
 		return;
+	}
+
+	if(currentProfileID != 11){
+		setLightingFromProfile(11);
 	}
 
 	if (updateStep == Func::Exit) {
@@ -210,7 +211,9 @@ void SpookyController::chaseState() {
 
 void SpookyController::spawnChaser() {
 	Player* leftmostPlayer = getLeftmostPlayer();
-    chaser = scast<Chaser*>(Actor::spawnActor(92, 0, &leftmostPlayer->position)); // Spawn the chaser actor
+	Vec3 spawnPos = leftmostPlayer->position;
+	spawnPos.x - 1000fx;
+    chaser = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos)); // Spawn the chaser actor
 }
 
 void SpookyController::spookyPalette() {
