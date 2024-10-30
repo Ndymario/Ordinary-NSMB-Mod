@@ -3,7 +3,7 @@ Just an ordinary mod for NSMB DS. :)
 
 Check out the [mod page](https://www.nsmbcentral.net/mods/An%20Ordinary%20NSMB%20Mod/) for the download and more!
 
-Found a bug or want to give a suggetsion? Open an issue on this repo or send it in the [ONSMB channel](https://discord.com/channels/399424476259024897/1300891995065286717) over in NSMB Central.
+Found a bug or want to give a suggestion? Open an issue on this repo or send it in the [ONSMB channel](https://discord.com/channels/399424476259024897/1300891995065286717) over in NSMB Central.
 
 ## Credits
 __Programming__
