@@ -1,7 +1,11 @@
 # An Ordinary NSMB DS Mod
 Just an ordinary mod for NSMB DS. :)
 
-### Credits
+Check out the [mod page](https://www.nsmbcentral.net/mods/An%20Ordinary%20NSMB%20Mod/) for the download and more!
+
+Found a bug or want to give a suggetsion? Open an issue on this repo or send it in the [ONSMB channel](https://discord.com/channels/399424476259024897/1300891995065286717) over in NSMB Central.
+
+## Credits
 __Programming__
 - Ndymario
 - TheGameratorT
@@ -22,5 +26,3 @@ __Special Thanks__
 - TheGameratorT: Support
 
 This mod was inspired by "An Ordinary Sonic ROM Hack", created by Cinossu.
-
-Check out the [mod page](https://www.nsmbcentral.net/mods/An%20Ordinary%20NSMB%20Mod/) for the download and more!
