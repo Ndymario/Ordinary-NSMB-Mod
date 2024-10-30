@@ -1,9 +1,26 @@
 # An Ordinary NSMB DS Mod
-Just another code mod for NSMB DS!
+Just an ordinary mod for NSMB DS. :)
 
-Created by Ndymario.
-Huge thanks to TheGameratorT for helping out a ton!
+### Credits
+__Programming__
+- Ndymario
+- TheGameratorT
+
+__Graphics__
+- Slugmotif
+
+__Beta Testers__
+- Frosty Cake
+- Illy
+- Mosquito
+- Mr. Ztardust
+- SM451
+
+__Special Thanks__
+- Will Smith: Lighting Code
+- Garhoogan: NitroPaint
+- TheGameratorT: Support
+
+This mod was inspired by "An Ordinary Sonic ROM Hack", created by Cinossu.
 
 Check out the [mod page](https://www.nsmbcentral.net/mods/An%20Ordinary%20NSMB%20Mod/) for the download and more!
-
-This mod is inspired by "An Ordinary Sonic ROM Hack", created by Cinossu.
