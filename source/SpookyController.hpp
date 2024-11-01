@@ -75,6 +75,7 @@ public:
 	static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
 	static void endLevel();
+	static void jrEndLevel();
 
 private:
 	// Hooks
@@ -97,4 +98,5 @@ private:
 
 	bool doTicks = true;
 	bool levelOver = false;
+	u32 previousFlag = 0;
 };
