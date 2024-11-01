@@ -72,7 +72,7 @@ void SpookyController::onUpdate() {
 void SpookyController::onRender() {
 	if (isRenderingStatic) {
 		Vec3 scale(1fx);
-		Vec3 cameraPos = Vec3(0, 0, 512.0fx);
+		Vec3 cameraPos = Vec3(0, 0, 1023fx);
 		fx32 cameraPosXStart = Stage::cameraX[Game::localPlayerID];
 		fx32 cameraPosYStart = -Stage::cameraY[Game::localPlayerID] - 64.0fx;
 
