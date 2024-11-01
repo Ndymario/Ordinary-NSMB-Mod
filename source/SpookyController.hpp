@@ -74,6 +74,8 @@ public:
 	static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
 	static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
+	static void endLevel();
+
 private:
 	// Hooks
 	static void stageSetup_hook();
@@ -92,4 +94,7 @@ private:
 	static bool startSeq_hook(s32 seqID, bool restart);
 	static void startStageThemeSeq_hook(s32 seqID);
 	static void playerBeginEnteranceTransition_hook(Player* player, EntranceType type);
+
+	bool doTicks = true;
+	bool levelOver = false;
 };

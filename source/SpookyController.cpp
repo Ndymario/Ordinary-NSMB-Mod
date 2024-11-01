@@ -31,8 +31,6 @@ extern "C" {
 	void func20BE084(void* stage);
 }
 
-static inline bool Stage_hasLevelFinished() { return *rcast<u32*>(0x020CA8C0) & ~0x80010000; }
-
 SpookyController* SpookyController::instance = nullptr;
 
 SpookyController* SpookyController::getInstance() {
@@ -63,7 +61,7 @@ void SpookyController::onCreate() {
 }
 
 void SpookyController::onUpdate() {
-	if (Stage_hasLevelFinished()) {
+	if (!doTicks) {
 		return;
 	}
 	updateFunc(this);
@@ -173,6 +171,11 @@ void SpookyController::transitionState() {
 			SND::pauseBGM(false);
 			setLightingFromProfile(0);
 			switchState(&SpookyController::waitSpawnChaserState);
+			if (levelOver)
+			{
+				doTicks = false;
+			}
+			
 		} else {
 			usingSpookyPalette = true;
 			setLightingFromProfile(11);
@@ -398,6 +401,18 @@ bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState poweru
 		return applyPowerup_backup(player, powerup);
 	}
 }
+
+void SpookyController::endLevel(){
+	instance->onBlockHit();
+	instance->levelOver = true;
+}
+
+ncp_set_hook(0x02118030, 10, SpookyController::endLevel);	// Player::goalBeginPoleGrab()
+ncp_set_hook(0x0211A9A8, 10, SpookyController::endLevel);	// Player::bossDefeatTransitState()
+ncp_set_hook(0x0211F2A4, 10, SpookyController::endLevel);	// Player::beginBossDefeatCutscene()
+ncp_set_hook(0x0211A370, 10, SpookyController::endLevel);	// Player::bossVictoryTransitState()
+ncp_set_hook(0x021409B8, 28, SpookyController::endLevel);	// Bowser Jr KO state
+ncp_set_hook(0x021333D4, 16, SpookyController::endLevel);	// Mummypokey KO state
 
 // ncp_jump(0x02011f04)
 // void SpookyController::startStageThemeSeq_hook(s32 seqID){
