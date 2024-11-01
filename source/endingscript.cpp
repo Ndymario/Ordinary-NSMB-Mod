@@ -62,7 +62,7 @@ static constexpr End::ScriptEntry script[] = {
 	{"An Ordinary NSMB Mod"end, 5, 25, End::ScriptEntry::Red, true},
 	{"Special Thanks"end, 5, 58, End::ScriptEntry::Red, true},
 	{"Will Smith - Lighting Code"end, 5, 87, End::ScriptEntry::Blue, false},
-	{"Garhoogan - NitroPaint"end, 5, 105, End::ScriptEntry::Blue, false},
+	{"Garhoogin - NitroPaint"end, 5, 105, End::ScriptEntry::Blue, false},
 	{"TheGameratorT - Support"end, 5, 123, End::ScriptEntry::Blue, false},
 	// Page 6
 	{"An Ordinary NSMB Mod"end, 6, 25, End::ScriptEntry::Red, true},

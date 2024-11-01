@@ -24,7 +24,7 @@ __Beta Testers__
 
 __Special Thanks__
 - Will Smith: Lighting Code
-- Garhoogan: NitroPaint
+- Garhoogin: NitroPaint
 - TheGameratorT: Support
 
 This mod was inspired by "An Ordinary Sonic ROM Hack", created by Cinossu.
