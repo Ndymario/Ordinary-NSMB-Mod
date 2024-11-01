@@ -116,6 +116,11 @@ void SpookyController::waitSpawnChaserState() {
 		updateStep = 1;
 		return;
 	}
+
+	if (levelOver){
+		doTicks = false;
+	}
+
 	if (updateStep == Func::Exit) {
 		return;
 	}
@@ -169,10 +174,9 @@ void SpookyController::transitionState() {
 		if (usingSpookyPalette) {
 			usingSpookyPalette = false;
 			SND::pauseBGM(false);
-			setLightingFromProfile(0);
+			setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
 			switchState(&SpookyController::waitSpawnChaserState);
-			if (levelOver)
-			{
+			if (levelOver){
 				doTicks = false;
 			}
 			
@@ -403,6 +407,7 @@ bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState poweru
 }
 
 void SpookyController::endLevel(){
+	Log() << "Level ended!\n";
 	instance->onBlockHit();
 	instance->levelOver = true;
 }
