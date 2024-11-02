@@ -61,7 +61,6 @@ void SpookyController::onCreate() {
 }
 
 void SpookyController::onUpdate() {
-	Log() << Game::getLocalPlayer()->defeatedFlag << "\n";
 	if (!doTicks) {
 		return;
 	}
@@ -174,10 +173,12 @@ void SpookyController::transitionState() {
 			
 			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
 			SND::pauseBGM(false);
-			if(SND::bgmSeqID == 7){
-				SND::playBGM(7, false);
-			} else {
-				SND::playBGM(view->bgmID, false);
+			if(!Game::getLocalPlayer()->defeatedFlag){
+				if(SND::bgmSeqID == 7){
+					SND::playBGM(7, false);
+				} else {
+					SND::playBGM(view->bgmID, false);
+				}
 			}
 			setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
 			switchState(&SpookyController::waitSpawnChaserState);
