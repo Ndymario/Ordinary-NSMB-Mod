@@ -419,8 +419,8 @@ void SpookyController::jrEndLevel(){
 }
 
 void SpookyController::endLevel(){
-	Log() << "Level ended!\n";
 	instance->onBlockHit();
+	Log() << "Level over\n";
 	instance->levelOver = true;
 }
 
@@ -432,7 +432,7 @@ ncp_set_hook(0x021333D4, 16, SpookyController::endLevel);	// Mummypokey KO state
 ncp_set_hook(0x02131C48, 18, SpookyController::endLevel);	// Cheepskipper KO state
 ncp_set_hook(0x021328E4, 14, SpookyController::endLevel);	// Mega Goomba KO state
 ncp_set_hook(0x021307BC, 15, SpookyController::endLevel);	// Petey Piranha KO state
-//ncp_set_hook(0x02130EE0, 19, SpookyController::endLevel);	// Montey Tank KO state
+ncp_set_hook(0x021332EC, 19, SpookyController::endLevel);	// Montey Tank KO state
 //ncp_set_hook(0x02130EE0, 19, SpookyController::endLevel);	// Lakithunder KO state
 
 ncp_jump(0x02011f04)
