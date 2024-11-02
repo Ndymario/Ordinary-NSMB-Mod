@@ -61,6 +61,7 @@ void SpookyController::onCreate() {
 }
 
 void SpookyController::onUpdate() {
+	Log() << Game::getLocalPlayer()->defeatedFlag << "\n";
 	if (!doTicks) {
 		return;
 	}
@@ -419,7 +420,6 @@ void SpookyController::jrEndLevel(){
 }
 
 void SpookyController::endLevel(){
-	Log() << "Level end\n";
 	instance->onBlockHit();
 	instance->levelOver = true;
 }
@@ -437,7 +437,7 @@ ncp_set_hook(0x0212FD14, 17, SpookyController::endLevel);	// Lakithunder KO stat
 
 ncp_jump(0x02011f04)
 void SpookyController::startStageThemeSeq_hook(s32 seqID){
-	if (instance != nullptr && instance->isSpooky && Game::getLocalPlayer()->defeatedFlag){
+	if (instance != nullptr && instance->isSpooky && !Game::getLocalPlayer()->defeatedFlag){
 		return;
 	} else {
 		startStageThemeSeq_backup(seqID);
@@ -446,7 +446,7 @@ void SpookyController::startStageThemeSeq_hook(s32 seqID){
 
 ncp_jump(0x02011e7c)
 void SpookyController::startSeq_hook(s32 seqID, bool restart){
-	if (instance != nullptr && instance->isSpooky && Game::getLocalPlayer()->defeatedFlag){
+	if (instance != nullptr && instance->isSpooky && !Game::getLocalPlayer()->defeatedFlag){
 		return;
 	} else {
 		startSeq_backup(seqID, restart);
