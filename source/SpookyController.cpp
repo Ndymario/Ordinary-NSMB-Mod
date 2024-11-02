@@ -142,7 +142,7 @@ void SpookyController::transitionState() {
 			Game::getPlayer(i)->updateLocked = true;
 		}
 
-        transitionDuration = 10 + Wifi::getRandom() % (50 - 10 + 1);
+        transitionDuration = 5 + Wifi::getRandom() % (50 - 10 + 1);
         spookTimer = transitionDuration;
         updateStep = 1;
         return;
@@ -173,7 +173,10 @@ void SpookyController::transitionState() {
 	} else {
 		if (usingSpookyPalette) {
 			usingSpookyPalette = false;
+			
+			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
 			SND::pauseBGM(false);
+			SND::playBGM(view->bgmID, false);
 			setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
 			switchState(&SpookyController::waitSpawnChaserState);
 			if (levelOver){
@@ -431,25 +434,32 @@ ncp_set_hook(0x021307BC, 15, SpookyController::endLevel);	// Petey Piranha KO st
 //ncp_set_hook(0x02130EE0, 19, SpookyController::endLevel);	// Montey Tank KO state
 //ncp_set_hook(0x02130EE0, 19, SpookyController::endLevel);	// Lakithunder KO state
 
+ncp_jump(0x02011f04)
+void SpookyController::startStageThemeSeq_hook(s32 seqID){
+	if (instance != nullptr && instance->isSpooky){
+		return;
+	} else {
+		startStageThemeSeq_backup(seqID);
+	}
+}
 
+ncp_jump(0x02011e7c)
+void SpookyController::startSeq_hook(s32 seqID, bool restart){
+	if (instance != nullptr && instance->isSpooky){
+		return;
+	} else {
+		startSeq_backup(seqID, restart);
+	}
+}
 
-// ncp_jump(0x02011f04)
-// void SpookyController::startStageThemeSeq_hook(s32 seqID){
-// 	if (instance != nullptr && instance->isSpooky){
-// 		return;
-// 	} else {
-// 		startStageThemeSeq_backup(seqID);
-// 	}
-// }
+ncp_call(0x020a2514, 0)
+void SpookyController::unpauseResumeMusic(){
+	if(instance->isSpooky){
+		return;
+	}
 
-// ncp_jump(0x02011e7c)
-// bool SpookyController::startSeq_hook(s32 seqID, bool restart){
-// 	if (instance != nullptr && instance->isSpooky){
-// 		return;
-// 	} else {
-// 		return startSeq_backup(seqID, restart);
-// 	}
-// }
+	SND::pauseBGM(0);
+}
 
 // ------------ Backups ------------
 
@@ -482,7 +492,7 @@ NTR_NAKED void startStageThemeSeq_backup(s32 seqID)
 
 NTR_NAKED bool startSeq_backup(s32 seqID, bool restart)
 {asm(R"(
-        stmdb	sp!,{lr}
+        stmdb	sp!,{r4,lr}
         B       0x02011e80
     )");}
 

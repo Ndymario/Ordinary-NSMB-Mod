@@ -2916,6 +2916,21 @@ _ZN5Fader8fadedOutEv                            = 0x02007C68;
 _ZN4Game5faderE									= 0x02088f48;
 
 
+_ZN8FadeMask20characterFadeMaskIDsE = 0x0203bd88;
+_ZN8FadeMask8modelIDsE = 0x02026634;
+
+_ZTV8FadeMask = 0x0203BD8C;
+_ZN8FadeMaskC1Ev = 0x02014170;
+_ZN8FadeMaskD0Ev = 0x02014100;
+_ZN8FadeMaskD1Ev = 0x0201413c;
+
+_ZN8FadeMask10loadModelsEv = 0x020140a0;
+_ZN8FadeMask16updateTransitionENS_5ShapeEP7VecFx32tlNS_4ModeE = 0x02013c00;
+_ZN8FadeMask17loadMaskModelFileEv = 0x02013bdc;
+_ZN8FadeMask14loadMaskModelsEv = 0x02013bd0;
+_ZN8FadeMask6updateENS_5ShapeEP7VecFx32tlNS_4ModeE = 0x02013ba8;
+_ZN8FadeMask22getCharacterFadeMaskIDEh = 0x02013b98;
+
 /* arm9 */
 /*----------------------------------------------------------------------*/
 /*----------------------------- multiplayer ----------------------------*/
@@ -3304,7 +3319,7 @@ _ZN8Entrance20getEntranceSpawnTypeEa								= 0x0201E4A8;
 _ZN8Entrance19accessSpawnEntranceEh									= 0x0201E4D0;
 _ZN8Entrance14accessEntranceEah										= 0x0201E64C;
 _ZN8Entrance10switchAreaEv											= 0x0201E744;
-_ZN8Entrance10reloadAreaEv											= 0x0201E808;
+_ZN8Entrance10reloadAreaEh											= 0x0201E808;
 _ZN8Entrance13setTargetAreaEhh										= 0x0201E864;
 _ZN8Entrance17setTargetEntranceERK13StageEntrance					= 0x0201E8C4;
 _ZN8Entrance14tryUseEntranceEllh									= 0x0201E944;
@@ -4497,6 +4512,25 @@ _ZN5Stage13storedPowerupE							= 0x02085a4c;
 _ZN5Stage15stageGroupNamesE = 0x0203C8A0;
 _ZN5Stage11stageBlocksE = 0x0208B168;
 
+/* arm9 */
+/*----------------------------------------------------------------*/
+/*------------------------ stage data misc -----------------------*/
+/*----------------------------------------------------------------*/
+
+_ZN9StageView4Rect8overlapsERKS0_S2_ = 0x0201ED98;
+_ZN9StageView4Rect8containsERK4Vec3RKS0_ = 0x0201EE60;
+_ZN9StageZone3getEhP9RectangleIlE = 0x0201EEF8;
+_ZN9StageView5getAtERKNS_4RectE = 0x0201EF94;
+_ZN9StageView5getAtERK4Vec3 = 0x0201F000;
+_ZN9StageView9getHeightEh = 0x0201F06C;
+_ZN9StageView8getWidthEh = 0x0201F090;
+_ZN9StageView17getProgressPathIDEh = 0x0201F0B4;
+_ZN9StageView12getLightTypeEh = 0x0201F0D8;
+_ZN9StageView7getUnk3Eh = 0x0201F0F4;
+_ZN9StageView7getUnk2Eh = 0x0201F118;
+_ZN9StageView7getUnk1Eh = 0x0201F13C;
+_ZN9StageView19getCameraSettingsIDEh = 0x0201F160;
+_ZN9StageView3getEhP9RectangleIlE = 0x0201F184;
 
 /* arm9 */
 /*----------------------------------------------------------------*/
