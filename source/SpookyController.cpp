@@ -174,7 +174,9 @@ void SpookyController::transitionState() {
 			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
 			SND::pauseBGM(false);
 			if(!Game::getLocalPlayer()->defeatedFlag){
-				if(SND::bgmSeqID == 7){
+				if(Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
+					SND::playBGM(21, false);
+				} else if(SND::bgmSeqID == 7){
 					SND::playBGM(7, false);
 				} else {
 					SND::playBGM(view->bgmID, false);
