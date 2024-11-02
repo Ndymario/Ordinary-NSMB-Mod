@@ -135,11 +135,11 @@ void SpookyController::waitSpawnChaserState() {
 void SpookyController::transitionState() {
 	if (updateStep == Func::Init) {
         isRenderingStatic = true;
-        Stage::freezeFlag = 1;
 
 		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
 			Stage::setZoom(1.0fx, 0, i, 0);
 			Game::getPlayer(i)->updateLocked = true;
+			Game::getPlayer(i)->freezeStage();
 		}
 
         transitionDuration = 5 + Wifi::getRandom() % (50 - 10 + 1);
@@ -152,16 +152,13 @@ void SpookyController::transitionState() {
 		
 		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
 			Game::getPlayer(i)->updateLocked = false;
+			Game::getPlayer(i)->unfreezeStage();
 		}
-
-		Stage::freezeFlag = 0;
 
 		return;
 	}
 
 	if (spookTimer > 0) {
-		Stage::freezeFlag = 1;
-		
 		if (spookTimer == transitionDuration / 2) {
 			if (usingSpookyPalette) {
 				unspookyPalette();
@@ -176,7 +173,11 @@ void SpookyController::transitionState() {
 			
 			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
 			SND::pauseBGM(false);
-			SND::playBGM(view->bgmID, false);
+			if(SND::bgmSeqID == 7){
+				SND::playBGM(7, false);
+			} else {
+				SND::playBGM(view->bgmID, false);
+			}
 			setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
 			switchState(&SpookyController::waitSpawnChaserState);
 			if (levelOver){
@@ -436,7 +437,7 @@ ncp_set_hook(0x021307BC, 15, SpookyController::endLevel);	// Petey Piranha KO st
 
 ncp_jump(0x02011f04)
 void SpookyController::startStageThemeSeq_hook(s32 seqID){
-	if (instance != nullptr && instance->isSpooky){
+	if (instance != nullptr && instance->isSpooky && Game::getLocalPlayer()->defeatedFlag){
 		return;
 	} else {
 		startStageThemeSeq_backup(seqID);
@@ -445,7 +446,7 @@ void SpookyController::startStageThemeSeq_hook(s32 seqID){
 
 ncp_jump(0x02011e7c)
 void SpookyController::startSeq_hook(s32 seqID, bool restart){
-	if (instance != nullptr && instance->isSpooky){
+	if (instance != nullptr && instance->isSpooky && Game::getLocalPlayer()->defeatedFlag){
 		return;
 	} else {
 		startSeq_backup(seqID, restart);
