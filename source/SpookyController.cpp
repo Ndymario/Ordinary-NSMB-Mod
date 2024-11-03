@@ -53,7 +53,7 @@ void SpookyController::onCreate() {
 
 	for (u32 row = 0; row < 3; row++) {
 		for (u32 col = 0; col < 4; col++) {
-			nsbtxTexID[row][col] = Wifi::getRandom() % 4;
+			nsbtxTexID[row][col] = Net::getRandom() % 4;
 		}
 	}
 
@@ -142,7 +142,7 @@ void SpookyController::transitionState() {
 			Game::getPlayer(i)->freezeStage();
 		}
 
-        transitionDuration = 5 + Wifi::getRandom() % (50 - 10 + 1);
+        transitionDuration = 5 + Net::getRandom() % (50 - 10 + 1);
         spookTimer = transitionDuration;
         updateStep = 1;
         return;
