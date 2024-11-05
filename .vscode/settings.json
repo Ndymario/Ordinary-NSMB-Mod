@@ -2,6 +2,8 @@
     "cmake.configureOnOpen": false,
     "files.associations": {
         "cmath": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "*.tcc": "cpp",
+        "istream": "cpp"
     }
 }

@@ -69,6 +69,8 @@ public:
     s32 deathTimer;   // Timer that anchors the behavior of the actor so it's not too RNG
     s32 suspenseTime;     // The time that triggers "suspense" mode
 
+	bool hasSpawnedForBoss = false;
+
 	bool changeLighting();
 	
 	static void lerpColor(GXRgb& color, GXRgb target, fx32 step);

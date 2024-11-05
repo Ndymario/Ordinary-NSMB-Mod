@@ -46,6 +46,7 @@ void SpookyController::onCreate() {
 	usingSpookyPalette = false;
 	isRenderingStatic = false;
 	isSpooky = false;
+	hasSpawnedForBoss = false;
 
 	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256];
 
@@ -98,6 +99,7 @@ void SpookyController::onDestroy() {
 }
 
 void SpookyController::onAreaChange() {
+	hasSpawnedForBoss = false;
 	onPrepareResources();
 	if (isSpooky) {
 		spookyPalette();
@@ -176,7 +178,7 @@ void SpookyController::transitionState() {
 			if(!Game::getLocalPlayer()->defeatedFlag){
 				if(Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
 					SND::playBGM(21, false);
-				} else if(SND::bgmSeqID == 7){
+				} else if(SND::bgmSeqID == 7 || view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
 					SND::playBGM(7, false);
 				} else {
 					SND::playBGM(view->bgmID, false);
@@ -220,6 +222,15 @@ void SpookyController::chaseState() {
 	}
 
 	if (chaser == nullptr) {
+		// If the chaser gets despawned in a boss room, disable spooky mode as the boss is defeated
+		StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
+		if (view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
+			if(hasSpawnedForBoss){
+				endLevel();
+				return;
+			}
+			hasSpawnedForBoss = true;
+		}
 		spawnChaser();
 	}
 }
@@ -431,7 +442,7 @@ ncp_set_hook(0x02118030, 10, SpookyController::endLevel);	// Player::goalBeginPo
 ncp_set_hook(0x0211A9A8, 10, SpookyController::endLevel);	// Player::bossDefeatTransitState()
 ncp_set_hook(0x0211F2A4, 10, SpookyController::endLevel);	// Player::beginBossDefeatCutscene()
 ncp_set_hook(0x0211A370, 10, SpookyController::endLevel);	// Player::bossVictoryTransitState()
-ncp_set_hook(0x021333D4, 16, SpookyController::endLevel);	// Mummypokey KO state
+//ncp_set_hook(0x02133454, 16, SpookyController::endLevel);	// Mummypokey KO state
 ncp_set_hook(0x021303C4, 18, SpookyController::endLevel);	// Cheepskipper KO state
 ncp_set_hook(0x021328E4, 14, SpookyController::endLevel);	// Mega Goomba KO state
 ncp_set_hook(0x021307BC, 15, SpookyController::endLevel);	// Petey Piranha KO state

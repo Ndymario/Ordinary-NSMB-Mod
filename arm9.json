@@ -22,5 +22,5 @@
 	}],
 	
 	"arenaLo": "0x02065F10",
-	"symbols": "symbols9.x"
+	"symbols": "${env:CODE_REFERENCE_ROOT}/symbols9.x"
 }
