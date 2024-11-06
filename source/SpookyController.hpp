@@ -10,6 +10,11 @@
 
 using namespace Lighting;
 
+enum ChaserVSMode {
+	OneChaser,
+	AllChaser
+};
+
 class SpookyController {
 private:
     inline SpookyController() = default;  // Private constructor to prevent multiple instances
@@ -48,23 +53,26 @@ private:
     Every subsequent time, the time remaining is somewhere inbetween 30 seconds and 15 seconds.
     */
 
-    s32 spookTimer;     // Time left until sp00ky mode happens
-	bool isSpooky;
-	s32 transitionDuration;
-	bool usingSpookyPalette;
+	s32* spookTimer;
+	bool* isSpooky;
+	s32* transitionDuration;
+	bool* usingSpookyPalette;
+	bool* isRenderingStatic;
+
+	NSBTX staticNsbtx;
+	u32 nsbtxTexID[3][4];
 
 	u16 colorBackup;
 	u16* paletteBackup; // Contains the normal palette
 
-	NSBTX staticNsbtx;
-	u32 nsbtxTexID[3][4];
-	bool isRenderingStatic;
-
 public:
     static SpookyController* getInstance();
 
-    // Singleton access methods
-    Chaser* chaser = nullptr; // Chaser pointer to manage the spooky chaser
+    Chaser** chasers; // Chaser pointer to manage the spooky chaser
+	s32 playerCount;
+	s32 currTarget;
+
+	ChaserVSMode currVSMode;
 
     s32 deathTimer;   // Timer that anchors the behavior of the actor so it's not too RNG
     s32 suspenseTime;     // The time that triggers "suspense" mode

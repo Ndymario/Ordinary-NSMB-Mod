@@ -39,7 +39,9 @@ public:
     static constexpr ActorProfile profile = {&constructObject<Chaser>, updatePriority, renderPriority, loadResources};
     
     Player* closestPlayer;
+    s32 currentTarget;
     NSBTX spookyNsbtx;
     u8 texID = 0;
     bool resetMusic;
+    s32 chaserID;
 };

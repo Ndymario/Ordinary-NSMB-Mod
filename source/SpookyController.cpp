@@ -43,10 +43,32 @@ void SpookyController::onPrepareResources() {
 }
 
 void SpookyController::onCreate() {
-	usingSpookyPalette = false;
-	isRenderingStatic = false;
-	isSpooky = false;
 	hasSpawnedForBoss = false;
+
+	playerCount = Game::getPlayerCount();
+
+	if(Game::vsMode){
+		currTarget = Net::getRandom() % (playerCount - 1);
+	} else {
+		currTarget = 0;
+	}
+
+	usingSpookyPalette = new bool[playerCount];
+	isRenderingStatic = new bool[playerCount];
+	isSpooky = new bool[playerCount];
+	chasers = new Chaser*[playerCount];
+
+	for (s32 i = 0; i < playerCount; i++){
+		usingSpookyPalette[i] = false;
+		isRenderingStatic[i] = false;
+		isSpooky[i] = false;
+		chasers[i] = nullptr;
+	}
+	
+	if(Game::vsMode){
+		// TODO: Make this use an in-game setting.
+		currVSMode = ChaserVSMode::AllChaser;
+	}
 
 	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256];
 
@@ -84,6 +106,7 @@ void SpookyController::onRender() {
 				u32 texID = nsbtxTexID[row][col];
 
 				staticNsbtx.setTexture(texID);
+				
 				staticNsbtx.render(cameraPos, scale);
 
 				nsbtxTexID[row][col] = (texID + 1) % 4;
@@ -95,6 +118,7 @@ void SpookyController::onRender() {
 void SpookyController::onDestroy() {
 	if (paletteBackup != nullptr) {
 		delete[] paletteBackup;
+		delete[] chasers;
 	}
 }
 
@@ -114,7 +138,14 @@ void SpookyController::onBlockHit() {
 
 void SpookyController::waitSpawnChaserState() {
 	if (updateStep == Func::Init) {
-		spookTimer = 600;
+		if(currVSMode != ChaserVSMode::OneChaser){
+			for (s32 i = 0; i < playerCount; i++)
+			{
+				spookTimer[i] = 600;
+			}
+		} else {
+			spookTimer[currTarget] = 600;
+		}
 		updateStep = 1;
 		return;
 	}
@@ -136,21 +167,41 @@ void SpookyController::waitSpawnChaserState() {
 
 void SpookyController::transitionState() {
 	if (updateStep == Func::Init) {
-        isRenderingStatic = true;
 
-		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
-			Stage::setZoom(1.0fx, 0, i, 0);
-			Game::getPlayer(i)->updateLocked = true;
-			Game::getPlayer(i)->freezeStage();
+		if(currVSMode != ChaserVSMode::OneChaser){
+			for (s32 i = 0; i < playerCount; i++)
+			{
+				isRenderingStatic[i] = true;
+				transitionDuration[i] = 5 + Net::getRandom() % (50 - 10 + 1);
+        		spookTimer[i] = transitionDuration[i];
+			}
+		} else {
+			isRenderingStatic[currTarget] = true;
+			transitionDuration[currTarget] = 5 + Net::getRandom() % (50 - 10 + 1);
+        	spookTimer[currTarget] = transitionDuration[currTarget];
 		}
 
-        transitionDuration = 5 + Net::getRandom() % (50 - 10 + 1);
-        spookTimer = transitionDuration;
+		if(!Game::vsMode){
+			for (s32 i = 0; i < Game::getPlayerCount(); i++) {
+				Stage::setZoom(1.0fx, 0, i, 0);
+				Game::getPlayer(i)->updateLocked = true;
+				Game::getPlayer(i)->freezeStage();
+			}
+		}
+
         updateStep = 1;
         return;
 	}
 	if (updateStep == Func::Exit) {
-		isRenderingStatic = false;
+
+		if(currVSMode != ChaserVSMode::OneChaser){
+			for (s32 i = 0; i < playerCount; i++)
+			{
+				isRenderingStatic[i] = false;
+			}
+		} else {
+			isRenderingStatic[currTarget] = false;
+		}
 		
 		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
 			Game::getPlayer(i)->updateLocked = false;
@@ -214,32 +265,60 @@ void SpookyController::chaseState() {
 	}
 
 	if (updateStep == Func::Exit) {
-		if (chaser != nullptr) {
-			chaser->Base::destroy();
+		for (s32 i = 0; i < playerCount; i++){
+			if (chasers[i] != nullptr) {
+				chasers[i]->Base::destroy();
+			}
+			isSpooky = false;
 		}
-		isSpooky = false;
 		return;
 	}
 
-	if (chaser == nullptr) {
-		// If the chaser gets despawned in a boss room, disable spooky mode as the boss is defeated
-		StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
-		if (view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
-			if(hasSpawnedForBoss){
-				endLevel();
-				return;
+	// I think this check is only needed for SP?
+	if(!Game::vsMode){
+		if (chasers[0] == nullptr) {
+			// If the chaser gets despawned in a boss room, disable spooky mode as the boss is defeated
+			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
+			if (view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
+				if(hasSpawnedForBoss){
+					endLevel();
+					return;
+				}
+				hasSpawnedForBoss = true;
 			}
-			hasSpawnedForBoss = true;
+			spawnChaser();
 		}
-		spawnChaser();
 	}
 }
 
 void SpookyController::spawnChaser() {
-	Player* leftmostPlayer = getLeftmostPlayer();
-	Vec3 spawnPos = leftmostPlayer->position;
+	Player* localPlayer = Game::getLocalPlayer();
+	Vec3 spawnPos = localPlayer->position;
 	spawnPos.x - 1000fx;
-    chaser = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos)); // Spawn the chaser actor
+
+	if(Game::vsMode){
+		spawnPos.y + 64fx;
+	}
+
+	// Spawn the required number of chasers based on the mode.
+	if (Game::vsMode) {
+		if (currVSMode == ChaserVSMode::OneChaser) {
+			// Spawn a single chaser and assign the initial target.
+			chasers[0] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
+			chasers[0]->currentTarget = currTarget;
+			Log() << "First target: " << chasers[0]->currentTarget;
+		} else {
+			// Spawn chasers equal to player count.
+			for (s32 i = 0; i < playerCount; i++) {
+				chasers[i] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
+				chasers[i]->chaserID = i;
+				chasers[0]->currentTarget = i;
+			}
+		}
+	} else {
+		chasers[0] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
+		chasers[0]->currentTarget = 0;
+	}
 }
 
 void SpookyController::spookyPalette() {
@@ -328,18 +407,30 @@ void SpookyController::stageSetup_hook() {
 
 ncp_hook(0x020A2C88, 0)
 void SpookyController::stageUpdate_hook() {
-	instance->onUpdate();
+	// Do our "setup" in the update step for MvsL
+	if (Game::vsMode){
+		if(instance == nullptr){
+			instance = new SpookyController();
+			instance->onCreate();
+		}
+	}
+
+	if(instance != nullptr){
+		instance->onUpdate();
+	}
 }
 
 ncp_hook(0x020A2E50, 0)
 void SpookyController::stageRender_hook() {
-	instance->onRender();
+	if(instance != nullptr){
+		instance->onRender();
+	}
 }
 
 ncp_hook(0x020A2EF8, 0)
 void SpookyController::stageDestroy_hook() {
 	// You can remove the condition to destroy on area changes
-	if (Scene::nextSceneID != scast<u16>(SceneID::Stage)) {
+	if (Scene::nextSceneID != scast<u16>(SceneID::Stage) && instance != nullptr) {
 		instance->onDestroy();
 		delete instance;
 		instance = nullptr;
@@ -348,7 +439,7 @@ void SpookyController::stageDestroy_hook() {
 
 ncp_hook(0x0209E7D0, 0)
 void SpookyController::hitBlock_hook() {
-	if (instance != nullptr) {
+	if (instance != nullptr && !Game::vsMode) {
 		instance->onBlockHit();
 	}
 }
@@ -469,7 +560,7 @@ void SpookyController::startSeq_hook(s32 seqID, bool restart){
 
 ncp_call(0x020a2514, 0)
 void SpookyController::unpauseResumeMusic(){
-	if(instance->isSpooky){
+	if(instance->isSpooky && instance != nullptr){
 		return;
 	}
 

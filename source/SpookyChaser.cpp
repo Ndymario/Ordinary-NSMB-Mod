@@ -60,7 +60,11 @@ bool Chaser::updateMain() {
 }
 
 void Chaser::moveTowardsPlayer() {
-	closestPlayer = getClosestPlayer(nullptr, nullptr);
+    if (Game::vsMode){
+        closestPlayer = Game::getPlayer(currentTarget);
+    } else {
+        closestPlayer = getClosestPlayer(nullptr, nullptr);
+    }
 
     if (ctrl->deathTimer >= ctrl->suspenseTime) {
         position.x = closestPlayer->position.x - ctrl->deathTimer * 1.0fx;
@@ -70,6 +74,7 @@ void Chaser::moveTowardsPlayer() {
 
     position.y = closestPlayer->position.y - 16fx;
     position.z = closestPlayer->position.z;
+    wrapPosition(position);
     
     if(resetMusic){
         SND::pauseBGM(true);
@@ -87,6 +92,6 @@ s32 Chaser::onRender() {
 // Code runs when this Actor is being destroyed
 s32 Chaser::onDestroy() {
     SpookyController* controller = SpookyController::getInstance();
-	controller->chaser = nullptr;
+	controller->chasers[chaserID] = nullptr;
     return 1;
 }
