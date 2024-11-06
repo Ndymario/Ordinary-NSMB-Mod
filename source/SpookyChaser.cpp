@@ -9,7 +9,13 @@ ncp_over(0x020C619C, 0) const ObjectInfo objectInfo = Chaser::objectInfo; //Stag
 ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::profile; //objectID 92
 
 bool Chaser::onPrepareResources(){
-    void* nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+    void* nsbtxFile;
+    Log() << Game::getPlayerCharacter(Game::getLocalPlayer()->playerID);
+    if(!Game::getPlayerCharacter(Game::getLocalPlayer()->playerID)){
+        nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+    } else {
+        nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
+    }
     texID = 0;
 	spookyNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
     return 1;
