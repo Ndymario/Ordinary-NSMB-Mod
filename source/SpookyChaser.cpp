@@ -90,7 +90,6 @@ s32 Chaser::onCreate() {
 
 // Code that runs every frame
 bool Chaser::updateMain() {
-    Log::print("Hi");
     spookyNsbtx.setTexture(texID);
     spookyNsbtx.setPalette(texID);
     if(deathTimer % 5 == 0){

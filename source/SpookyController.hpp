@@ -33,7 +33,7 @@ public:
 
     static SpookyController* getInstance();
 
-    Chaser** chasers; // Chaser pointer to manage the spooky chaser
+    Chaser* chasers[2]; // Chaser pointer to manage the spooky chaser
 	s32 playerCount;
 	s32 currTarget;
 

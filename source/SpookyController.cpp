@@ -61,7 +61,6 @@ void SpookyController::onUpdate() {
 void SpookyController::onDestroy() {
 	if (paletteBackup != nullptr) {
 		delete[] paletteBackup;
-		delete[] chasers;
 	}
 }
 
