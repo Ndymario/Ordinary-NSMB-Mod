@@ -4,6 +4,7 @@
         "cmath": "cpp",
         "memory_resource": "cpp",
         "*.tcc": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "__config": "cpp"
     }
 }
