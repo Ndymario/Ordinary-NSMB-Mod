@@ -14,10 +14,8 @@ void SpookyController::onPrepareResources() {
 	if(!Game::vsMode){
 		Vec3 spawnPos = Game::getLocalPlayer()->position;
 		spawnPos.x - 1000fx;
-		chasers[0] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
-		chasers[0]->currentTarget = Game::getLocalPlayer()->id;
-		chasers[0]->chaserID = 0;
-		chasers[0]->ctrl = instance;
+		u32 settings = (Game::getLocalPlayer()->id << 8) | 0;
+		chasers[0] = scast<Chaser*>(Actor::spawnActor(92, settings, &spawnPos));
 		return;
 	}
 
@@ -26,10 +24,8 @@ void SpookyController::onPrepareResources() {
 		Vec3 spawnPos = Game::getPlayer(currTarget)->position;
 		spawnPos.x - 1000fx;
 		spawnPos.y + 36fx;
+		u32 settings = (currTarget << 8) | 0;
 		chasers[0] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
-		chasers[0]->currentTarget = currTarget;
-		chasers[0]->chaserID = 0;
-		chasers[0]->ctrl = instance;
 		return;
 	}
 
@@ -39,10 +35,8 @@ void SpookyController::onPrepareResources() {
 			Vec3 spawnPos = Game::getPlayer(i)->position;
 			spawnPos.x - 1000fx;
 			spawnPos.y + 36fx;
+			u32 settings = (currTarget << 8) | i;
 			chasers[i] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
-			chasers[i]->currentTarget = currTarget;
-			chasers[i]->chaserID = i;
-			chasers[i]->ctrl = instance;
 		}
 	}
 	

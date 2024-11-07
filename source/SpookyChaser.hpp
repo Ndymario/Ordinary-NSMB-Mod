@@ -99,11 +99,11 @@ public:
 	u16* paletteBackup; // Contains the normal palette
     
     Player* closestPlayer;
-    s32 currentTarget;
+    s32 currentTarget = (settings & 0xFF00) >> 8;
     NSBTX spookyNsbtx;
     u8 texID = 0;
     bool resetMusic;
-    s32 chaserID;
+    s32 chaserID = settings & 0xFF;
 
     ChaserVSMode currVSMode;
 
