@@ -13,10 +13,6 @@ enum ChaserVSMode {
 
 class Chaser: public StageEntity {
 private:
-	SpookyController* ctrl;
-
-    static Chaser* instance;
-
 	void moveTowardsPlayer();
 
     fx32 playerBuffer = 40fx;
@@ -45,6 +41,11 @@ public:
     static constexpr u16 updatePriority = objectID;
     static constexpr u16 renderPriority = objectID;
     static constexpr ActorProfile profile = {&constructObject<Chaser>, updatePriority, renderPriority, loadResources};
+
+    SpookyController* ctrl;
+
+    static Chaser* instance;
+    Chaser* getInstance();
 
 	void onBlockHit();
 

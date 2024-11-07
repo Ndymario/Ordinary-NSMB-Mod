@@ -2,8 +2,6 @@
 
 #include "nsmb/system/function.hpp"
 
-using namespace Lighting;
-
 static Player* getLeftmostPlayer();
 
 SpookyController* SpookyController::instance = nullptr;
@@ -18,6 +16,8 @@ void SpookyController::onPrepareResources() {
 		spawnPos.x - 1000fx;
 		chasers[0] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
 		chasers[0]->currentTarget = Game::getLocalPlayer()->id;
+		chasers[0]->chaserID = 0;
+		chasers[0]->ctrl = instance;
 		return;
 	}
 
@@ -28,6 +28,8 @@ void SpookyController::onPrepareResources() {
 		spawnPos.y + 36fx;
 		chasers[0] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
 		chasers[0]->currentTarget = currTarget;
+		chasers[0]->chaserID = 0;
+		chasers[0]->ctrl = instance;
 		return;
 	}
 
@@ -39,6 +41,8 @@ void SpookyController::onPrepareResources() {
 			spawnPos.y + 36fx;
 			chasers[i] = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos));
 			chasers[i]->currentTarget = currTarget;
+			chasers[i]->chaserID = i;
+			chasers[i]->ctrl = instance;
 		}
 	}
 	

@@ -5,6 +5,9 @@ The "chaser" is the sp00ky Luigi that the player can see chasing them when sp00k
 #include "SpookyChaser.hpp"
 #include "SpookyController.hpp"
 
+#include "nsmb/system/function.hpp"
+using namespace Lighting;
+
 ncp_over(0x020C619C, 0) const ObjectInfo objectInfo = Chaser::objectInfo; //Stage Actor ID 192
 ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::profile; //objectID 92
 
@@ -22,6 +25,10 @@ void startStageThemeSeq_backup(s32 seqID);
 
 Chaser* Chaser::instance = nullptr;
 
+Chaser* Chaser::getInstance(){
+    return instance;
+}
+
 asm(R"(
 	GoalFlag_updateGoalGrab = 0x0213042C
 	func20BE084 = 0x020BE084
@@ -33,17 +40,21 @@ extern "C" {
 }
 
 bool Chaser::onPrepareResources(){
-    void* nsbtxFile;
+    void* nsbtxFile1;
     if(!Game::getPlayerCharacter(Game::getLocalPlayer()->playerID)){
-        nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+        nsbtxFile1 = FS::Cache::loadFile(2089 - 131, false);
     } else {
-        nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
+        nsbtxFile1 = FS::Cache::loadFile(2090 - 131, false);
     }
     texID = 0;
-	spookyNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
+	spookyNsbtx.setup(nsbtxFile1, Vec2(64, 64), Vec2(0, 0), 0, 0);
 
-    nsbtxFile = FS::Cache::loadFile(2088 - 131, false);
-	staticNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
+    void* nsbtxFile2;
+    nsbtxFile2 = FS::Cache::loadFile(2088 - 131, false);
+	staticNsbtx.setup(nsbtxFile2, Vec2(64, 64), Vec2(0, 0), 0, 0);
+
+    instance = this;
+
     return 1;
 }
 
@@ -79,6 +90,7 @@ s32 Chaser::onCreate() {
 
 // Code that runs every frame
 bool Chaser::updateMain() {
+    Log::print("Hi");
     spookyNsbtx.setTexture(texID);
     spookyNsbtx.setPalette(texID);
     if(deathTimer % 5 == 0){
@@ -91,6 +103,7 @@ bool Chaser::updateMain() {
     if (deathTimer <= 0) {
         closestPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
 		deathTimer = 0;
+        onDestroy();
     }
 
     return 1;
@@ -470,7 +483,7 @@ void Chaser::startSeq_hook(s32 seqID, bool restart){
 
 ncp_call(0x020a2514, 0)
 void Chaser::unpauseResumeMusic(){
-	if(instance->isSpooky){
+	if(instance != nullptr && instance->isSpooky){
 		return;
 	}
 
@@ -486,8 +499,10 @@ void Chaser::jrEndLevel(){
 }
 
 void Chaser::endLevel(){
-	instance->onBlockHit();
-	instance->levelOver = true;
+    if(instance != nullptr){
+        instance->onBlockHit();
+	    instance->levelOver = true;
+    }
 }
 
 ncp_set_hook(0x02118030, 10, Chaser::endLevel);	// Player::goalBeginPoleGrab()
