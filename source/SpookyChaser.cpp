@@ -11,11 +11,6 @@ using namespace Lighting;
 ncp_over(0x020C619C, 0) const ObjectInfo objectInfo = Chaser::objectInfo; //Stage Actor ID 192
 ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::profile; //objectID 92
 
-static u16* getBGExtPltt(u32 destSlotAddr);
-static u16* getOBJExtPltt(u32 destSlotAddr);
-static u16* getTexPltt(u32 destSlotAddr);
-static u16 makeMonochrome(u16 color);
-static void makeRangeMonochrome(u16* startAddr, u32 count);
 bool Game_addPlayerCoin_backup(s32 playerID);
 void Game_addPlayerScore_backup(s32 playerID, s32 count);
 void GoalFlag_onPoleBarrierCollided_backup(void* goal, ActiveCollider* other);
@@ -90,19 +85,12 @@ s32 Chaser::onCreate() {
 
 // Code that runs every frame
 bool Chaser::updateMain() {
+    updateFunc(this);
+
     spookyNsbtx.setTexture(texID);
     spookyNsbtx.setPalette(texID);
     if(deathTimer % 5 == 0){
         texID = (texID + 1) % 6;
-    }
-	moveTowardsPlayer();
-
-    deathTimer -= 1;
-
-    if (deathTimer <= 0) {
-        closestPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
-		deathTimer = 0;
-        onDestroy();
     }
 
     return 1;
@@ -133,8 +121,8 @@ void Chaser::transitionState() {
         if(!Game::vsMode){
             for (s32 i = 0; i < Game::getPlayerCount(); i++) {
                 Stage::setZoom(1.0fx, 0, i, 0);
-                Game::getPlayer(i)->updateLocked = true;
-                Game::getPlayer(i)->freezeStage();
+                //Game::getPlayer(i)->updateLocked = true;
+                //Game::getPlayer(i)->freezeStage();
             }
         }
 
@@ -147,8 +135,8 @@ void Chaser::transitionState() {
 		isRenderingStatic = false;
 		
 		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
-			Game::getPlayer(i)->updateLocked = false;
-			Game::getPlayer(i)->unfreezeStage();
+			//Game::getPlayer(i)->updateLocked = false;
+			//Game::getPlayer(i)->unfreezeStage();
 		}
 
 		return;
@@ -157,9 +145,9 @@ void Chaser::transitionState() {
 	if (spookTimer > 0) {
 		if (spookTimer == transitionDuration / 2) {
 			if (usingSpookyPalette) {
-				unspookyPalette();
+				ctrl->unspookyPalette();
 			} else {
-				spookyPalette();
+				ctrl->spookyPalette();
 			}
 		}
 		spookTimer--;
@@ -199,6 +187,15 @@ void Chaser::chaseState() {
 		return;
 	}
 
+    moveTowardsPlayer();
+    deathTimer -= 1;
+
+    if (deathTimer <= 0) {
+        closestPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
+		deathTimer = 0;
+        onDestroy();
+    }
+
 	if(currentProfileID != 11){
 		setLightingFromProfile(11);
 	}
@@ -213,31 +210,8 @@ void Chaser::chaseState() {
 void Chaser::onAreaChange(bool isSpooky){
     onPrepareResources();
     if (isSpooky){
-        spookyPalette();
+        ctrl->spookyPalette();
     }
-}
-
-void Chaser::unspookyPalette() {
-	// TOP SCREEN
-	u16* objColors = rcast<u16*>(HW_OBJ_PLTT);
-	MI_CpuCopyFast(paletteBackup, objColors, 256 * 2);
-
-	GX_BeginLoadOBJExtPltt();
-	u16* extObjColors = getOBJExtPltt(0);
-	MI_CpuCopyFast(&paletteBackup[256], extObjColors, 256 * 16 * 2);
-	GX_EndLoadOBJExtPltt();
-
-	GX_BeginLoadBGExtPltt();
-	u16* bgColors = getBGExtPltt(0x4000);
-	MI_CpuCopyFast(&paletteBackup[256 + (256 * 16)], bgColors, 256 * 32 * 2);
-	GX_EndLoadBGExtPltt();
-
-	// BOTTOM SCREEN
-	u16* dbBgColors = rcast<u16*>(HW_DB_BG_PLTT);
-	MI_CpuCopyFast(&paletteBackup[256 + (256 * 16) + (256 * 32)], dbBgColors, 256 * 2);
-
-	u16* dbObjColors = rcast<u16*>(HW_DB_OBJ_PLTT);
-	MI_CpuCopyFast(&paletteBackup[256 + (256 * 16) + (256 * 32) + 256], dbObjColors, 256 * 2);
 }
 
 void Chaser::switchState(void (Chaser::*updateFunc)()) {
@@ -257,11 +231,7 @@ void Chaser::switchState(void (Chaser::*updateFunc)()) {
 }
 
 void Chaser::moveTowardsPlayer() {
-    if (Game::vsMode){
-        closestPlayer = Game::getPlayer(currentTarget);
-    } else {
-        closestPlayer = getClosestPlayer(nullptr, nullptr);
-    }
+    closestPlayer = Game::getPlayer(currentTarget);
 
     if (deathTimer >= suspenseTime) {
         position.x = closestPlayer->position.x - deathTimer * 1.0fx;
@@ -302,8 +272,11 @@ s32 Chaser::onRender() {
 			}
 		}
 	}
-    Vec3 scale(1fx);
-    spookyNsbtx.render(position, scale);
+
+    if(isSpooky){
+        Vec3 scale(1fx);
+        spookyNsbtx.render(position, scale);
+    }
     return 1;
 }
 
@@ -317,68 +290,6 @@ s32 Chaser::onDestroy() {
 void Chaser::onBlockHit() {
 	if (isSpooky) {
 		switchState(&Chaser::transitionState);
-	}
-}
-
-void Chaser::spookyPalette() {
-	// TOP SCREEN
-	u16* objColors = rcast<u16*>(HW_OBJ_PLTT);
-	MI_CpuCopyFast(objColors, paletteBackup, 256 * 2);
-	makeRangeMonochrome(objColors, 256);
-
-	GX_BeginLoadOBJExtPltt();
-	u16* extObjColors = getOBJExtPltt(0);
-	MI_CpuCopyFast(extObjColors, &paletteBackup[256], 256 * 16 * 2);
-	makeRangeMonochrome(extObjColors, 256 * 16);
-	GX_EndLoadOBJExtPltt();
-
-	GX_BeginLoadBGExtPltt();
-	u16* bgColors = getBGExtPltt(0x4000);
-	MI_CpuCopyFast(bgColors, &paletteBackup[256 + (256 * 16)], 256 * 32 * 2);
-	makeRangeMonochrome(bgColors, 256 * 32);
-	GX_EndLoadBGExtPltt();
-
-	/*GX_BeginLoadTexPltt();
-	u16* texPlttColors = getTexPltt(0);
-	makeRangeMonochrome(texPlttColors, 256 * 64);
-	GX_EndLoadTexPltt();*/
-
-	// BOTTOM SCREEN
-	u16* dbBgColors = rcast<u16*>(HW_DB_BG_PLTT);
-	MI_CpuCopyFast(dbBgColors, &paletteBackup[256 + (256 * 16) + (256 * 32)], 256 * 2);
-	makeRangeMonochrome(dbBgColors, 256);
-
-	u16* dbObjColors = rcast<u16*>(HW_DB_OBJ_PLTT);
-	MI_CpuCopyFast(dbObjColors, &paletteBackup[256 + (256 * 16) + (256 * 32) + 256], 256 * 2);
-	makeRangeMonochrome(dbObjColors, 256);
-}
-
-// ------------ Utils ------------
-
-static u16* getBGExtPltt(u32 destSlotAddr) {
-	return rcast<u16*>(*rcast<u32*>(0x02094274) + destSlotAddr - *rcast<u32*>(0x02094270));
-}
-
-static u16* getOBJExtPltt(u32 destSlotAddr) {
-	return rcast<u16*>(*rcast<u32*>(0x02094268) + destSlotAddr);
-}
-
-static u16* getTexPltt(u32 destSlotAddr) {
-	return rcast<u16*>(*rcast<u32*>(0x02094280) + destSlotAddr);
-}
-
-static u16 makeMonochrome(u16 color) {
-  	u8 r, g, b;
-  	r = (color >> 0) & 0x1F;
-  	g = (color >> 5) & 0x1F;
-  	b = (color >> 10) & 0x1F;
-	u16 gray = (scast<u16>(r) + scast<u16>(g) + scast<u16>(b)) / 3;
-	return (gray << 10) | (gray << 5) | gray;
-}
-
-static void makeRangeMonochrome(u16* startAddr, u32 count) {
-	for (u32 i = 0; i < count; i++) {
-		startAddr[i] = makeMonochrome(startAddr[i]);
 	}
 }
 

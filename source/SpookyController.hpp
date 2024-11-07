@@ -28,6 +28,9 @@ public:
 
     static SpookyController* instance;
 
+	void spookyPalette();     // Make the tiles look sp00ky
+    void unspookyPalette();   // Make the tiles look unsp00ky
+
 	u16 colorBackup;
 	u16* paletteBackup; // Contains the normal palette
 

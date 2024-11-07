@@ -54,8 +54,6 @@ public:
 	void chaseState();
 
     void spookyOverlay();     // A static overlay to transition to sp00ky mode
-    void spookyPalette();     // Make the tiles look sp00ky
-    void unspookyPalette();   // Make the tiles look unsp00ky
 
     void onAreaChange(bool isSpooky);
 
@@ -94,16 +92,13 @@ public:
 
 	NSBTX staticNsbtx;
 	u32 nsbtxTexID[3][4];
-
-	u16 colorBackup;
-	u16* paletteBackup; // Contains the normal palette
     
     Player* closestPlayer;
-    s32 currentTarget = (settings & 0xFF00) >> 8;
+    u32 currentTarget = (settings & 0xFF00) >> 8;
     NSBTX spookyNsbtx;
     u8 texID = 0;
     bool resetMusic;
-    s32 chaserID = settings & 0xFF;
+    u32 chaserID = settings & 0xFF;
 
     ChaserVSMode currVSMode;
 
