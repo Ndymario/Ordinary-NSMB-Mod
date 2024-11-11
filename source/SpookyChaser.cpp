@@ -131,6 +131,7 @@ void Chaser::transitionState() {
         updateStep = 1;
         return;
 	}
+
 	if (updateStep == Func::Exit) {
 		isRenderingStatic = false;
 		
@@ -254,8 +255,8 @@ s32 Chaser::onRender() {
     if (isRenderingStatic) {
 		Vec3 scale(1fx);
 		Vec3 cameraPos = Vec3(0, 0, 1023fx);
-		fx32 cameraPosXStart = Stage::cameraX[Game::localPlayerID];
-		fx32 cameraPosYStart = -Stage::cameraY[Game::localPlayerID] - 64.0fx;
+		fx32 cameraPosXStart = Stage::cameraX[currentTarget];
+		fx32 cameraPosYStart = -Stage::cameraY[currentTarget] - 64.0fx;
 
 		for (u32 row = 0; row < 3; row++) {
 			for (u32 col = 0; col < 4; col++) {
@@ -277,6 +278,7 @@ s32 Chaser::onRender() {
         Vec3 scale(1fx);
         spookyNsbtx.render(position, scale);
     }
+	
     return 1;
 }
 
