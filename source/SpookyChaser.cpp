@@ -10,8 +10,7 @@ ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::pro
 
 bool Chaser::onPrepareResources(){
     void* nsbtxFile;
-    Log() << Game::getPlayerCharacter(Game::getLocalPlayer()->playerID);
-    if(!Game::getPlayerCharacter(Game::getLocalPlayer()->playerID)){
+    if(!Game::getPlayerCharacter(currentTarget)){
         nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
     } else {
         nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
@@ -52,27 +51,30 @@ bool Chaser::updateMain() {
     ctrl->deathTimer -= 1;
 
     if (ctrl->deathTimer <= 0) {
-        closestPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
-		ctrl->deathTimer = 0;
+        targetPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
+		ctrl->onBlockHit();
     }
 
     return 1;
 }
 
 void Chaser::moveTowardsPlayer() {
-	closestPlayer = getClosestPlayer(nullptr, nullptr);
-
+	targetPlayer = Game::getPlayer(currentTarget);
     if (ctrl->deathTimer >= ctrl->suspenseTime) {
-        position.x = closestPlayer->position.x - ctrl->deathTimer * 1.0fx;
+        position.x = targetPlayer->position.x - ctrl->deathTimer * 1.0fx;
     } else {
-        position.x = closestPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
+        position.x = targetPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
     }
 
-    position.y = closestPlayer->position.y - 16fx;
-    position.z = closestPlayer->position.z;
+    position.y = targetPlayer->position.y - 16fx;
+    position.z = targetPlayer->position.z;
+
+    wrapPosition(position);
     
     if(resetMusic){
-        SND::pauseBGM(true);
+        if(!Game::vsMode){
+            SND::pauseBGM(true);
+        }
         SND::playSFXUnique(380);
         resetMusic = false;
     }

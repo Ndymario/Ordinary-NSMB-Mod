@@ -38,8 +38,10 @@ public:
     static constexpr u16 renderPriority = objectID;
     static constexpr ActorProfile profile = {&constructObject<Chaser>, updatePriority, renderPriority, loadResources};
     
-    Player* closestPlayer;
+    Player* targetPlayer;
     NSBTX spookyNsbtx;
     u8 texID = 0;
     bool resetMusic;
+
+    s32 currentTarget = settings & 0xFF;
 };

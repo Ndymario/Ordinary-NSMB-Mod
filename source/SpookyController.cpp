@@ -59,6 +59,8 @@ void SpookyController::onCreate() {
 	}
 
 	switchState(&SpookyController::waitSpawnChaserState);
+
+	currentTarget = scast<s32>(Net::getRandom() % 2);
 }
 
 void SpookyController::onUpdate() {
@@ -136,12 +138,16 @@ void SpookyController::waitSpawnChaserState() {
 
 void SpookyController::transitionState() {
 	if (updateStep == Func::Init) {
+		if(Game::getLocalPlayer()->playerID != currentTarget){
+			return;
+		}
+
         isRenderingStatic = true;
 
-		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
-			Stage::setZoom(1.0fx, 0, i, 0);
-			Game::getPlayer(i)->updateLocked = true;
-			Game::getPlayer(i)->freezeStage();
+		if(!Game::vsMode) {
+			Stage::setZoom(1.0fx, 0, 0, 0);
+			Game::getPlayer(0)->updateLocked = true;
+			Game::getPlayer(0)->freezeStage();
 		}
 
         transitionDuration = 5 + Net::getRandom() % (50 - 10 + 1);
@@ -152,9 +158,9 @@ void SpookyController::transitionState() {
 	if (updateStep == Func::Exit) {
 		isRenderingStatic = false;
 		
-		for (s32 i = 0; i < Game::getPlayerCount(); i++) {
-			Game::getPlayer(i)->updateLocked = false;
-			Game::getPlayer(i)->unfreezeStage();
+		if(!Game::vsMode) {
+			Game::getPlayer(0)->updateLocked = false;
+			Game::getPlayer(0)->unfreezeStage();
 		}
 
 		return;
@@ -163,9 +169,13 @@ void SpookyController::transitionState() {
 	if (spookTimer > 0) {
 		if (spookTimer == transitionDuration / 2) {
 			if (usingSpookyPalette) {
-				unspookyPalette();
+				if(Game::getLocalPlayer()->playerID == currentTarget){
+					unspookyPalette();
+				}
 			} else {
-				spookyPalette();
+				if(Game::getLocalPlayer()->playerID == currentTarget){
+					spookyPalette();
+				}
 			}
 		}
 		spookTimer--;
@@ -184,7 +194,11 @@ void SpookyController::transitionState() {
 					SND::playBGM(view->bgmID, false);
 				}
 			}
-			setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
+
+			if(Game::getLocalPlayer()->playerID == currentTarget){
+				setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
+			}
+
 			switchState(&SpookyController::waitSpawnChaserState);
 			if (levelOver){
 				doTicks = false;
@@ -192,7 +206,11 @@ void SpookyController::transitionState() {
 			
 		} else {
 			usingSpookyPalette = true;
-			setLightingFromProfile(11);
+
+			if(Game::getLocalPlayer()->playerID == currentTarget){
+				setLightingFromProfile(11);
+			}
+
 			switchState(&SpookyController::chaseState);
 		}
 	}
@@ -209,7 +227,7 @@ void SpookyController::chaseState() {
 		return;
 	}
 
-	if(currentProfileID != 11){
+	if(currentProfileID != 11 && Game::getLocalPlayer()->playerID == currentTarget){
 		setLightingFromProfile(11);
 	}
 
@@ -221,17 +239,19 @@ void SpookyController::chaseState() {
 		return;
 	}
 
-	if (chaser == nullptr) {
-		// If the chaser gets despawned in a boss room, disable spooky mode as the boss is defeated
-		StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
-		if (view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
-			if(hasSpawnedForBoss){
-				endLevel();
-				return;
+	if(!Game::vsMode){
+		if (chaser == nullptr) {
+			// If the chaser gets despawned in a boss room, disable spooky mode as the boss is defeated
+			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
+			if (view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
+				if(hasSpawnedForBoss){
+					endLevel();
+					return;
+				}
+				hasSpawnedForBoss = true;
 			}
-			hasSpawnedForBoss = true;
+			spawnChaser();
 		}
-		spawnChaser();
 	}
 }
 
@@ -239,7 +259,8 @@ void SpookyController::spawnChaser() {
 	Player* leftmostPlayer = getLeftmostPlayer();
 	Vec3 spawnPos = leftmostPlayer->position;
 	spawnPos.x - 1000fx;
-    chaser = scast<Chaser*>(Actor::spawnActor(92, 0, &spawnPos)); // Spawn the chaser actor
+	s32 settings = currentTarget;
+    chaser = scast<Chaser*>(Actor::spawnActor(92, settings, &spawnPos)); // Spawn the chaser actor
 }
 
 void SpookyController::spookyPalette() {
@@ -328,12 +349,22 @@ void SpookyController::stageSetup_hook() {
 
 ncp_hook(0x020A2C88, 0)
 void SpookyController::stageUpdate_hook() {
-	instance->onUpdate();
+	if (instance != nullptr){
+		instance->onUpdate();
+	}
+	// Do our setup in stageUpdate in MvsL
+	if (instance == nullptr && Game::vsMode){
+		instance = new SpookyController();
+		instance->onCreate();
+	}
+	
 }
 
 ncp_hook(0x020A2E50, 0)
 void SpookyController::stageRender_hook() {
-	instance->onRender();
+	if(instance != nullptr){
+		instance->onRender();
+	}
 }
 
 ncp_hook(0x020A2EF8, 0)
@@ -439,6 +470,7 @@ void SpookyController::endLevel(){
 }
 
 ncp_set_hook(0x02118030, 10, SpookyController::endLevel);	// Player::goalBeginPoleGrab()
+ncp_set_hook(0x0211BE18, 10, SpookyController::endLevel);	// Player::goalBeginMegaClear()
 ncp_set_hook(0x0211A9A8, 10, SpookyController::endLevel);	// Player::bossDefeatTransitState()
 ncp_set_hook(0x0211F2A4, 10, SpookyController::endLevel);	// Player::beginBossDefeatCutscene()
 ncp_set_hook(0x0211A370, 10, SpookyController::endLevel);	// Player::bossVictoryTransitState()

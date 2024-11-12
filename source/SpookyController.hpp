@@ -23,7 +23,6 @@ private:
 	void onDestroy();
 
 	void onAreaChange();
-	void onBlockHit();
 
 	void waitSpawnChaserState();
 	void transitionState();
@@ -76,6 +75,7 @@ public:
 	static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
 	static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
+	void onBlockHit();
 	static void endLevel();
 	static void jrEndLevel();
 
@@ -102,4 +102,5 @@ private:
 	bool doTicks = true;
 	bool levelOver = false;
 	u32 previousFlag = 0;
+	s32 currentTarget = 0;
 };
