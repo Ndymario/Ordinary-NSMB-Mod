@@ -83,6 +83,8 @@ void SpookyController::onRender() {
 				cameraPos.x = cameraPosXStart + (col * 64.0fx);
 				cameraPos.y = cameraPosYStart - (row * 64.0fx);
 
+				Game::wrapPosition(cameraPos);
+
 				u32 texID = nsbtxTexID[row][col];
 
 				staticNsbtx.setTexture(texID);
@@ -138,16 +140,17 @@ void SpookyController::waitSpawnChaserState() {
 
 void SpookyController::transitionState() {
 	if (updateStep == Func::Init) {
-		if(Game::getLocalPlayer()->playerID != currentTarget){
-			return;
-		}
-
         isRenderingStatic = true;
 
 		if(!Game::vsMode) {
 			Stage::setZoom(1.0fx, 0, 0, 0);
 			Game::getPlayer(0)->updateLocked = true;
 			Game::getPlayer(0)->freezeStage();
+		} else {
+			Game::getPlayer(0)->updateLocked = true;
+			Game::getPlayer(1)->updateLocked = true;
+			Game::getPlayer(0)->freezeStage();
+			Game::getPlayer(1)->freezeStage();
 		}
 
         transitionDuration = 5 + Net::getRandom() % (50 - 10 + 1);
@@ -161,6 +164,11 @@ void SpookyController::transitionState() {
 		if(!Game::vsMode) {
 			Game::getPlayer(0)->updateLocked = false;
 			Game::getPlayer(0)->unfreezeStage();
+		} else {
+			Game::getPlayer(0)->updateLocked = false;
+			Game::getPlayer(1)->updateLocked = false;
+			Game::getPlayer(0)->unfreezeStage();
+			Game::getPlayer(1)->unfreezeStage();
 		}
 
 		return;
@@ -183,15 +191,17 @@ void SpookyController::transitionState() {
 		if (usingSpookyPalette) {
 			usingSpookyPalette = false;
 			
-			StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
-			SND::pauseBGM(false);
-			if(!Game::getLocalPlayer()->defeatedFlag){
-				if(Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
-					SND::playBGM(21, false);
-				} else if(SND::bgmSeqID == 7 || view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
-					SND::playBGM(7, false);
-				} else {
-					SND::playBGM(view->bgmID, false);
+			if(!Game::vsMode){
+				StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
+				SND::pauseBGM(false);
+				if(!Game::getLocalPlayer()->defeatedFlag){
+					if(Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
+						SND::playBGM(21, false);
+					} else if(SND::bgmSeqID == 7 || view->bgmID == 80 || view->bgmID == 81 || view->bgmID == 82 || view->bgmID == 86){
+						SND::playBGM(7, false);
+					} else {
+						SND::playBGM(view->bgmID, false);
+					}
 				}
 			}
 
