@@ -346,6 +346,24 @@ void SpookyController::switchState(void (SpookyController::*updateFunc)()) {
 }
 
 // ------------ Hooks ------------
+ncp_hook(0x021106D8, 10)
+void SpookyController::playerBump_hook(Player* player, Vec3 velocity){
+	if(!Game::vsMode){
+		return;
+	}
+
+	if(player->playerID == instance->currentTarget){
+		return;
+	}
+
+	instance->onBlockHit();
+	instance->currentTarget ^= 1;
+	instance->chaser->currentTarget = instance->currentTarget;
+
+	if(instance->currentTarget == getWinningPlayerID(Game::getPlayerBattleStars(0), Game::getPlayerBattleStars(1))){
+		instance->spookTimer /= 2;
+	}
+}
 
 ncp_hook(0x0215ECA8, 54)
 void SpookyController::stageSetup_hook() {	
@@ -388,15 +406,15 @@ void SpookyController::stageDestroy_hook() {
 }
 
 ncp_hook(0x0209E7D0, 0)
-void SpookyController::hitBlock_hook() {
-	if (instance != nullptr) {
+void SpookyController::hitBlock_hook(fx32 blockX,fx32 blockY, int behaviour, int blockType, u8 dir, char param_6, s32 playerID, ActorType type) {
+	if (instance != nullptr && playerID == instance->currentTarget) {
 		instance->onBlockHit();
 	}
 }
 
 ncp_jump(0x02020354)
 bool SpookyController::getCoin_hook(s32 playerID) {
-	if (instance != nullptr && instance->isSpooky) {
+	if (instance != nullptr && instance->isSpooky && playerID == instance->currentTarget) {
 		if (Game::playerCoins[playerID] > 0) {
 			Game::playerCoins[playerID]--;
 			return true;
@@ -511,7 +529,7 @@ void SpookyController::startSeq_hook(s32 seqID, bool restart){
 
 ncp_call(0x020a2514, 0)
 void SpookyController::unpauseResumeMusic(){
-	if(instance->isSpooky){
+	if(instance->isSpooky && !Game::vsMode){
 		return;
 	}
 
@@ -635,3 +653,13 @@ void SpookyController::lerpLighting(StageLighting& current, const StageLighting&
 
 	setMatLighting(current);
 }
+
+bool SpookyController::getWinningPlayerID(s32 starsP0, s32 starsP1){
+	if (starsP0 < starsP1) {
+		return starsP0 < starsP1;
+	}
+	if (starsP0 == starsP1) {
+		return scast<bool>(Net::getRandom() % 2);
+	}
+	return starsP0 < starsP1;
+};
