@@ -346,9 +346,17 @@ void SpookyController::switchState(void (SpookyController::*updateFunc)()) {
 }
 
 // ------------ Hooks ------------
-ncp_hook(0x021106D8, 10)
-void SpookyController::playerBump_hook(Player* player, Vec3 velocity){
-	if(!Game::vsMode){
+ncp_hook(0x0209E13C, 0)
+void SpookyController::trySpawnBattleStar_hook(Player* player, int isPlayerDead, int wasGroundPound){
+	if(instance == nullptr){
+		return;
+	}
+
+	if(!instance->isSpooky){
+		return;
+	}
+
+	if(instance->chaser == nullptr){
 		return;
 	}
 
@@ -362,6 +370,10 @@ void SpookyController::playerBump_hook(Player* player, Vec3 velocity){
 
 	if(instance->currentTarget == getWinningPlayerID(Game::getPlayerBattleStars(0), Game::getPlayerBattleStars(1))){
 		instance->spookTimer /= 2;
+	}
+
+	if(wasGroundPound != 0){
+		instance->deathTimer /= 2;
 	}
 }
 
@@ -406,8 +418,8 @@ void SpookyController::stageDestroy_hook() {
 }
 
 ncp_hook(0x0209E7D0, 0)
-void SpookyController::hitBlock_hook(fx32 blockX,fx32 blockY, int behaviour, int blockType, u8 dir, char param_6, s32 playerID, ActorType type) {
-	if (instance != nullptr && playerID == instance->currentTarget) {
+void SpookyController::hitBlock_hook() {
+	if (instance != nullptr && !Game::vsMode) {
 		instance->onBlockHit();
 	}
 }

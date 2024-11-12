@@ -85,8 +85,8 @@ private:
 	static void stageUpdate_hook();
 	static void stageRender_hook();
 	static void stageDestroy_hook();
-	static void playerBump_hook(Player* player, Vec3 velocity);
-	static void hitBlock_hook(fx32 blockX,fx32 blockY, int behaviour, int blockType, u8 dir, char param_6, s32 playerID, ActorType type);
+	static void trySpawnBattleStar_hook(Player* player, int isPlayerDead, int wasGroundPound);
+	static void hitBlock_hook();
 	static bool getCoin_hook(s32 playerID);
 	static void getScore_hook(s32 playerID, s32 count);
 	static bool goalGrab_hook(void* goal);
