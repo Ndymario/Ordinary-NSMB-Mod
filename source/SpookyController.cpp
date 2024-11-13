@@ -208,6 +208,15 @@ void SpookyController::transitionState() {
 			if(Game::getLocalPlayer()->playerID == currentTarget){
 				setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
 			}
+			Log() << instance->chaser;
+			if(Game::vsMode && swapTarget){
+				instance->currentTarget ^= 1;
+
+				if(instance->currentTarget == getWinningPlayerID(Game::getPlayerBattleStars(0), Game::getPlayerBattleStars(1))){
+					instance->spookTimer /= 2;
+				}
+				swapTarget = false;
+			}
 
 			switchState(&SpookyController::waitSpawnChaserState);
 			if (levelOver){
@@ -365,12 +374,7 @@ void SpookyController::trySpawnBattleStar_hook(Player* player, int isPlayerDead,
 	}
 
 	instance->onBlockHit();
-	instance->currentTarget ^= 1;
-	instance->chaser->currentTarget = instance->currentTarget;
-
-	if(instance->currentTarget == getWinningPlayerID(Game::getPlayerBattleStars(0), Game::getPlayerBattleStars(1))){
-		instance->spookTimer /= 2;
-	}
+	instance->swapTarget = true;
 
 	if(wasGroundPound != 0){
 		instance->deathTimer /= 2;
@@ -488,7 +492,7 @@ void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
 ncp_jump(0x0212b9f8, 11)
 bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState powerup)
 {
-	if (instance != nullptr && instance->isSpooky){
+	if (instance != nullptr && instance->isSpooky && !Game::vsMode){
 		instance->onBlockHit();
 		return true;
 	} else {

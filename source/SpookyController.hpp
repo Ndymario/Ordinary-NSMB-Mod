@@ -102,6 +102,7 @@ private:
 
 	bool doTicks = true;
 	bool levelOver = false;
+	bool swapTarget = false;
 	u32 previousFlag = 0;
 	s32 currentTarget = 0;
 };
