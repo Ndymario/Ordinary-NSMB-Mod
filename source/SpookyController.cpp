@@ -60,7 +60,11 @@ void SpookyController::onCreate() {
 
 	switchState(&SpookyController::waitSpawnChaserState);
 
-	currentTarget = scast<s32>(Net::getRandom() % 2);
+	if(Game::vsMode){
+		currentTarget = scast<s32>(Net::getRandom() % 2);
+	} else {
+		currentTarget = 0;
+	}
 }
 
 void SpookyController::onUpdate() {
@@ -144,8 +148,8 @@ void SpookyController::transitionState() {
 
 		if(!Game::vsMode) {
 			Stage::setZoom(1.0fx, 0, 0, 0);
-			Game::getPlayer(0)->updateLocked = true;
-			Game::getPlayer(0)->freezeStage();
+			Game::getLocalPlayer()->updateLocked = true;
+			Game::getLocalPlayer()->freezeStage();
 		} else {
 			Game::getPlayer(0)->updateLocked = true;
 			Game::getPlayer(1)->updateLocked = true;
@@ -162,8 +166,8 @@ void SpookyController::transitionState() {
 		isRenderingStatic = false;
 		
 		if(!Game::vsMode) {
-			Game::getPlayer(0)->updateLocked = false;
-			Game::getPlayer(0)->unfreezeStage();
+			Game::getLocalPlayer()->updateLocked = false;
+			Game::getLocalPlayer()->unfreezeStage();
 		} else {
 			Game::getPlayer(0)->updateLocked = false;
 			Game::getPlayer(1)->updateLocked = false;
@@ -208,7 +212,7 @@ void SpookyController::transitionState() {
 			if(Game::getLocalPlayer()->playerID == currentTarget){
 				setLightingFromProfile(rcast<u8(*)(u8)>(0x0201f0d8)(Game::getLocalPlayer()->viewID));
 			}
-			Log() << instance->chaser;
+			
 			if(Game::vsMode && swapTarget){
 				instance->currentTarget ^= 1;
 
@@ -355,6 +359,15 @@ void SpookyController::switchState(void (SpookyController::*updateFunc)()) {
 }
 
 // ------------ Hooks ------------
+
+// ncp_hook(0x02020454)
+// void SpookyController::incrementPlayerBattleStars_hook(u32 playerNo){
+// 	Log() << playerNo;
+// 	if(instance != nullptr){
+// 		instance->onBlockHit();
+// 	}
+// }
+
 ncp_hook(0x0209E13C, 0)
 void SpookyController::trySpawnBattleStar_hook(Player* player, int isPlayerDead, int wasGroundPound){
 	if(instance == nullptr){
@@ -423,7 +436,7 @@ void SpookyController::stageDestroy_hook() {
 
 ncp_hook(0x0209E7D0, 0)
 void SpookyController::hitBlock_hook() {
-	if (instance != nullptr && !Game::vsMode) {
+	if (instance != nullptr && !Game::vsMode && !Stage::challengeModeEnabled) {
 		instance->onBlockHit();
 	}
 }
@@ -457,6 +470,19 @@ void SpookyController::getScore_hook(s32 playerID, s32 count) {
 		Game_addPlayerScore_backup(playerID, count);
 	}
 }
+
+void SpookyController::getOneLife_hook(s32 playerID){
+	if (instance != nullptr && instance->isSpooky && !Game::vsMode) {
+		Game::losePlayerLife(playerID);
+	} else {
+		Game::gainPlayerLife(playerID);
+	}
+}
+
+ncp_set_call(0x0209A9F0, 0, SpookyController::getOneLife_hook);
+ncp_set_call(0x0209AABC, 0, SpookyController::getOneLife_hook);
+ncp_set_call(0x0209AC78, 0, SpookyController::getOneLife_hook);
+ncp_set_call(0x02130680, 12, SpookyController::getOneLife_hook);
 
 ncp_call(0x021302C8, 12)
 bool SpookyController::goalGrab_hook(void* goal) {

@@ -59,7 +59,8 @@ bool Chaser::updateMain() {
 }
 
 void Chaser::moveTowardsPlayer() {
-	targetPlayer = Game::getPlayer(currentTarget);
+    targetPlayer = Game::getPlayer(currentTarget);
+
     if (ctrl->deathTimer >= ctrl->suspenseTime) {
         position.x = targetPlayer->position.x - ctrl->deathTimer * 1.0fx;
     } else {

@@ -77,6 +77,7 @@ public:
 
 	void onBlockHit();
 	static void endLevel();
+	static void getOneLife_hook(s32 playerID);
 	static void jrEndLevel();
 
 private:
@@ -99,6 +100,7 @@ private:
 	static void playerBeginEnteranceTransition_hook(Player* player, EntranceType type);
 	static void unpauseResumeMusic();
 	static bool getWinningPlayerID(s32 starsP0, s32 starsP1);
+	//static void incrementPlayerBattleStars_hook(u32 playerNo);
 
 	bool doTicks = true;
 	bool levelOver = false;
