@@ -52,7 +52,9 @@ bool Chaser::updateMain() {
 
     if (ctrl->deathTimer <= 0) {
         targetPlayer->damage(*this, 0, 0, PlayerDamageType::Death);
-		ctrl->onBlockHit();
+        if(Game::vsMode){
+            ctrl->onBlockHit();
+        }
     }
 
     return 1;
