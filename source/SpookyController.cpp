@@ -473,7 +473,10 @@ void SpookyController::getScore_hook(s32 playerID, s32 count) {
 
 void SpookyController::getOneLife_hook(s32 playerID){
 	if (instance != nullptr && instance->isSpooky && !Game::vsMode) {
-		Game::losePlayerLife(playerID);
+		if (Game::getPlayerLives(playerID) > 1)
+		{
+			Game::losePlayerLife(playerID);
+		}
 	} else {
 		Game::gainPlayerLife(playerID);
 	}
