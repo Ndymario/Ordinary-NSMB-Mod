@@ -1,6 +1,6 @@
 #include "NSBTX.hpp"
 
-#include "nsmb/game.hpp"
+#include "nsmb/game/game.hpp"
 
 void NSBTX::setup(void* file, const Vec2& size, const Vec2& center, int texID, int palID)
 {

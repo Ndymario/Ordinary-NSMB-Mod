@@ -1,7 +1,7 @@
 #pragma once
 
-#include "nsmb/math/vector.hpp"
-#include "nsmb/graphics/3d/texture.hpp"
+#include "nsmb/core/math/vector.hpp"
+#include "nsmb/core/graphics/3d/texture.hpp"
 
 class NSBTX
 {

@@ -1,6 +1,6 @@
 #include "SpookyController.hpp"
 
-#include "nsmb/system/function.hpp"
+#include "nsmb/core/system/function.hpp"
 
 using namespace Lighting;
 
