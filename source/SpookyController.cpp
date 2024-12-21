@@ -68,7 +68,7 @@ void SpookyController::onCreate() {
 }
 
 void SpookyController::onUpdate() {
-	if (!doTicks) {
+	if (!doTicks && !isRenderingStatic) {
 		return;
 	}
 	updateFunc(this);
