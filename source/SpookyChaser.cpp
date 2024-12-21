@@ -85,7 +85,9 @@ void Chaser::moveTowardsPlayer() {
 
 s32 Chaser::onRender() {
     Vec3 scale(1fx);
-    spookyNsbtx.render(position, scale);
+    if(ctrl->deathTimer < ctrl->suspenseTime){
+        spookyNsbtx.render(position, scale);
+    }
     return 1;
 }
 
