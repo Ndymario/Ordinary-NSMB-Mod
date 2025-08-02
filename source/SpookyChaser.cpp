@@ -11,9 +11,9 @@ ncp_over(0x02039AEC) static constexpr const ActorProfile* profile = &Chaser::pro
 bool Chaser::onPrepareResources(){
     void* nsbtxFile;
     if(!Game::getPlayerCharacter(currentTarget)){
-        nsbtxFile = FS::Cache::loadFile(2089 - 131, false);
+        nsbtxFile = FS::Cache::loadFile(2091 - 131, false);
     } else {
-        nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
+        nsbtxFile = FS::Cache::loadFile(2092 - 131, false);
     }
     texID = 0;
 	spookyNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);

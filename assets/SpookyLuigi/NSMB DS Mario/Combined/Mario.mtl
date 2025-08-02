@@ -1,0 +1,16 @@
+newmtl all_tx
+Ka 0.5019608 0.5019608 0.5019608
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka all_tx.png
+map_Kd all_tx.png
+map_d all_tx.png
+newmtl eye_tx
+Ka 0.5019608 0.5019608 0.5019608
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka eye_tx.png
+map_Kd eye_tx.png
+map_d eye_tx.png

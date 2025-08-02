@@ -1,0 +1,3 @@
+.\g3dcvtr.exe "\\Mac\Home\NSMB-DS-Modding\Ordinary-NSMB-Mod\assets\Boss\Luigi\spookyBossLuigi.ica" -o Z:\NSMB-DS-Modding\Ordinary-NSMB-Mod\NSNDY\root\zCustomActors\spookyBossLuigiIdle.nsbca
+
+.\g3dcvtr.exe "\\Mac\Home\NSMB-DS-Modding\Ordinary-NSMB-Mod\assets\Boss\Luigi\spookyBossLuigi.imd" -o Z:\NSMB-DS-Modding\Ordinary-NSMB-Mod\NSNDY\root\zCustomActors\spookyBossLuigi.nsbmd

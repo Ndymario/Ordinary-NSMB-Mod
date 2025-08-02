@@ -11,7 +11,7 @@
 using namespace Lighting;
 
 class SpookyController {
-private:
+public:
     inline SpookyController() = default;  // Private constructor to prevent multiple instances
     inline ~SpookyController() = default; // Private destructor for proper cleanup (singleton)
 
@@ -58,8 +58,8 @@ private:
 	NSBTX staticNsbtx;
 	u32 nsbtxTexID[3][4];
 	bool isRenderingStatic;
+	s32 staticDuration;
 
-public:
     static SpookyController* getInstance();
 
     // Singleton access methods
@@ -80,7 +80,8 @@ public:
 	static void getOneLife_hook(s32 playerID);
 	static void jrEndLevel();
 
-private:
+	bool doTicks = true;
+
 	// Hooks
 	static void stageSetup_hook();
 	static void stageUpdate_hook();
@@ -102,9 +103,11 @@ private:
 	static bool getWinningPlayerID(s32 starsP0, s32 starsP1);
 	//static void incrementPlayerBattleStars_hook(u32 playerNo);
 
-	bool doTicks = true;
 	bool levelOver = false;
 	bool swapTarget = false;
 	u32 previousFlag = 0;
 	s32 currentTarget = 0;
+
+	// Flag for the final boss stuff
+	bool finalBoss = false;
 };

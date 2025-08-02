@@ -1,0 +1,34 @@
+# Wavefront MTL
+# Created by fragMOTION 1.3.5
+# http://www.fragmosoft.com
+
+newmtl mat_body
+illum 2
+d 1
+ka 0.501961 0.501961 0.501961
+kd 0.972549 0.972549 0.968628
+ks 0 0 0
+ke 0 0 0
+ns 40
+map_ka mat_body.png
+map_kd mat_body.png
+newmtl mat_eye
+illum 2
+d 1
+ka 0.501961 0.501961 0.501961
+kd 0.972549 0.972549 0.968628
+ks 0 0 0
+ke 0 0 0
+ns 40
+map_ka mat_eye.png
+map_kd mat_eye.png
+newmtl mat_head
+illum 2
+d 1
+ka 0.501961 0.501961 0.501961
+kd 0.972549 0.972549 0.968628
+ks 0 0 0
+ke 0 0 0
+ns 40
+map_ka mat_head.png
+map_kd mat_head.png

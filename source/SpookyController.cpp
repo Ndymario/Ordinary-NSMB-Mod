@@ -38,7 +38,7 @@ SpookyController* SpookyController::getInstance() {
 }
 
 void SpookyController::onPrepareResources() {
-	void* nsbtxFile = FS::Cache::loadFile(2088 - 131, false);
+	void* nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
 	staticNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
 }
 
@@ -75,7 +75,7 @@ void SpookyController::onUpdate() {
 }
 
 void SpookyController::onRender() {
-	if (isRenderingStatic) {
+	if (isRenderingStatic || staticDuration > 0) {
 		Vec3 scale(1fx);
 		Vec3 cameraPos = Vec3(0, 0, 1023fx);
 		fx32 cameraPosXStart = Stage::cameraX[Game::localPlayerID];
@@ -96,6 +96,10 @@ void SpookyController::onRender() {
 
 				nsbtxTexID[row][col] = (texID + 1) % 4;
 			}
+		}
+
+		if(staticDuration > 0){
+			staticDuration -= 1;
 		}
 	}
 }
@@ -160,6 +164,7 @@ void SpookyController::transitionState() {
         transitionDuration = 5 + Net::getRandom() % (50 - 10 + 1);
         spookTimer = transitionDuration;
         updateStep = 1;
+
         return;
 	}
 	if (updateStep == Func::Exit) {
@@ -174,7 +179,6 @@ void SpookyController::transitionState() {
 			Game::getPlayer(0)->unfreezeStage();
 			Game::getPlayer(1)->unfreezeStage();
 		}
-
 		return;
 	}
 
@@ -229,11 +233,6 @@ void SpookyController::transitionState() {
 			
 		} else {
 			usingSpookyPalette = true;
-
-			if(Game::getLocalPlayer()->playerID == currentTarget){
-				setLightingFromProfile(11);
-			}
-
 			switchState(&SpookyController::chaseState);
 		}
 	}
@@ -244,7 +243,10 @@ void SpookyController::chaseState() {
     	deathTimer = 1200;
     	suspenseTime = 900;
 		isSpooky = true;
-		spawnChaser();
+
+		if (!finalBoss){
+			spawnChaser();
+		}
 
 		updateStep = 1;
 		return;
@@ -273,7 +275,11 @@ void SpookyController::chaseState() {
 				}
 				hasSpawnedForBoss = true;
 			}
-			spawnChaser();
+
+			// Don't ever spawn the chaser for the final boss
+			if (!finalBoss){
+				spawnChaser();
+			}
 		}
 	}
 }
@@ -395,7 +401,7 @@ void SpookyController::trySpawnBattleStar_hook(Player* player, int isPlayerDead,
 }
 
 ncp_hook(0x0215ECA8, 54)
-void SpookyController::stageSetup_hook() {	
+void SpookyController::stageSetup_hook() {
 	if (instance == nullptr) {
 		instance = new SpookyController();
 		instance->onCreate();
@@ -558,7 +564,7 @@ ncp_set_hook(0x0212FD14, 17, SpookyController::endLevel);	// Lakithunder KO stat
 
 ncp_jump(0x02011f04)
 void SpookyController::startStageThemeSeq_hook(s32 seqID){
-	if (instance != nullptr && instance->isSpooky && !Game::getLocalPlayer()->defeatedFlag){
+	if (instance != nullptr && instance->isSpooky && !Game::getLocalPlayer()->defeatedFlag && !instance->finalBoss){
 		return;
 	} else {
 		startStageThemeSeq_backup(seqID);
@@ -567,7 +573,7 @@ void SpookyController::startStageThemeSeq_hook(s32 seqID){
 
 ncp_jump(0x02011e7c)
 void SpookyController::startSeq_hook(s32 seqID, bool restart){
-	if (instance != nullptr && instance->isSpooky && !Game::getLocalPlayer()->defeatedFlag){
+	if (instance != nullptr && instance->isSpooky && !Game::getLocalPlayer()->defeatedFlag && !instance->finalBoss){
 		return;
 	} else {
 		startSeq_backup(seqID, restart);
@@ -576,7 +582,7 @@ void SpookyController::startSeq_hook(s32 seqID, bool restart){
 
 ncp_call(0x020a2514, 0)
 void SpookyController::unpauseResumeMusic(){
-	if(instance->isSpooky && !Game::vsMode){
+	if(instance->isSpooky && !Game::vsMode && !instance->finalBoss){
 		return;
 	}
 

@@ -31,7 +31,8 @@ public:
         0, 0,
         0, 0,
         0, 0,
-        CollisionSwitch::None,
+        EntityProperties::None,
+        SpawnSettings::None
     };
 
     static constexpr u16 updatePriority = objectID;
