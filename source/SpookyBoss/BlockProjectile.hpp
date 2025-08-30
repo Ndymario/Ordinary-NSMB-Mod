@@ -107,4 +107,8 @@ public:
     Vec2 oamScale;
     u32 frameCounter = 0;
     Vec3 toPlayer;
+
+    // Cached zone info to avoid per-frame allocations
+    Rectangle<fx32> zoneRect = Rectangle<fx32>(0, 0, 0, 0);
+    StageZone* zone = nullptr;
 };

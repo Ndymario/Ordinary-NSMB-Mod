@@ -25,7 +25,7 @@ private:
     void mimicDamage();
     void mimicDefeated();
     Vec3 mirrorPosition;
-    Rectangle<fx32>* zoneRect = new Rectangle<fx32>(0, 0, 0, 0);
+    Rectangle<fx32> zoneRect = Rectangle<fx32>(0, 0, 0, 0);
     StageZone* zone;
 public:
     void prepareResources();

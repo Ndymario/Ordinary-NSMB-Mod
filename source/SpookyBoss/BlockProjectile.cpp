@@ -94,7 +94,7 @@ void BlockProjectile::spawn(){
             Player* player = Game::getLocalPlayer();
             Vec3 toPlayer = player->position - position;
             toPlayer.y += 32fx;
-            toPlayer.normalize();
+            toPlayer = toPlayer.normalize();
             velocity.x = toPlayer.x * 0.001fx;
             velocity.y = toPlayer.y * 0.001fx;
             switchState(&BlockProjectile::bouncing);
@@ -103,8 +103,10 @@ void BlockProjectile::spawn(){
 }
 
 void BlockProjectile::bouncing(){
-    Rectangle<fx32>* zoneRect = new Rectangle<fx32>(0, 0, 0, 0);
-    StageZone* zone = StageZone::get(0, zoneRect);
+    // Initialize zone information once and reuse
+    if (zone == nullptr) {
+        zone = StageZone::get(0, &zoneRect);
+    }
 
     if (updateStep == Func::Init) {
         scale = Vec3(1.0fx, 1.0fx, 1.0fx);
@@ -117,26 +119,26 @@ void BlockProjectile::bouncing(){
         Player* player = Game::getLocalPlayer();
         toPlayer = player->position - position;
         toPlayer.y += 32fx;
-        toPlayer.normalize();
+        toPlayer = toPlayer.normalize();
         velocity.x = toPlayer.x * 0.001fx;
         velocity.y = toPlayer.y * 0.001fx;
 
-        if (position.x < zoneRect->x && velocity.x < 0){
+        if (position.x < zoneRect.x && velocity.x < 0){
             velocity.x = -velocity.x;
             flipX = !flipX;
         }
 
-        if (position.x > zoneRect->x + zoneRect->width && velocity.x > 0){
+        if (position.x > zoneRect.x + zoneRect.width && velocity.x > 0){
             velocity.x = -velocity.x;
             flipX = !flipX;
         }
 
-        if (position.y > zoneRect->y && velocity.y > 0){
+        if (position.y > zoneRect.y && velocity.y > 0){
             velocity.y = -velocity.y;
             flipY = !flipY;
         }
         
-        if (position.y < zoneRect->y - zoneRect->height && velocity.y < 0){
+        if (position.y < zoneRect.y - zoneRect.height && velocity.y < 0){
             velocity.y = -velocity.y;
             flipY = !flipY;
         }

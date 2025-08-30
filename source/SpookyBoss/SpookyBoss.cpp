@@ -119,7 +119,7 @@ void SpookyBoss::introAnimation(){
 
 void SpookyBoss::mimicState(){
     if (updateStep == Func::Init) {
-        zone = StageZone::get(0, zoneRect);
+        zone = StageZone::get(0, &zoneRect);
         model.init(0, FrameCtrl::Type::Standard, 1fx, 0);
         mirrorPosition = position;
         updateStep = 1;
@@ -135,7 +135,7 @@ void SpookyBoss::mimicState(){
     Game::setPlayerLookAtPosition(Vec3(position.x, position.y + 32fx, 0));
     Game::setPlayerLookingAtTarget(true);
 
-    if (player->position.x < zoneRect->x || player->position.x > zoneRect->x + zoneRect->width || player->position.y > zoneRect->y || player->position.y < zoneRect->y - zoneRect->height){
+    if (player->position.x < zoneRect.x || player->position.x > zoneRect.x + zoneRect.width || player->position.y > zoneRect.y || player->position.y < zoneRect.y - zoneRect.height){
             SpookyController* instance = SpookyController::getInstance();
             instance->staticDuration = 10;
             player->position = Vec3(initialPosition.x - 4fx, initialPosition.y, player->position.z);

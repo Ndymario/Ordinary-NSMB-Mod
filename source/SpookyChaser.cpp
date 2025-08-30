@@ -69,7 +69,7 @@ void Chaser::moveTowardsPlayer() {
         position.x = targetPlayer->position.x - playerBuffer - ctrl->deathTimer * 0.25fx;
     }
 
-    position.y = targetPlayer->position.y - 16fx;
+    position.y = targetPlayer->position.y - 2fx;
     position.z = targetPlayer->position.z;
 
     wrapPosition(position);
