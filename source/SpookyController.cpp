@@ -495,6 +495,15 @@ ncp_set_call(0x0209AABC, 0, SpookyController::getOneLife_hook);
 ncp_set_call(0x0209AC78, 0, SpookyController::getOneLife_hook);
 ncp_set_call(0x02130680, 12, SpookyController::getOneLife_hook);
 
+ncp_call(0x0209AC70, 0)
+void SpookyController::playOneupSound(s32 sfxID, Vec3* pos){
+	if(instance != nullptr && instance->isSpooky){
+		SND::playSFXUnique(380);
+	} else {
+		SND::playSFX(sfxID, pos);
+	}
+}
+
 ncp_call(0x021302C8, 12)
 bool SpookyController::goalGrab_hook(void* goal) {
 	if (instance != nullptr && instance->isSpooky) {

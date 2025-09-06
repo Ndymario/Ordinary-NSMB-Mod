@@ -78,6 +78,7 @@ public:
 	void onBlockHit();
 	static void endLevel();
 	static void getOneLife_hook(s32 playerID);
+	static void playOneupSound(s32 sfxID, Vec3* pos);
 	static void jrEndLevel();
 
 	bool doTicks = true;
