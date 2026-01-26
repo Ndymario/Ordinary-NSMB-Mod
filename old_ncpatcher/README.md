@@ -1,0 +1,1 @@
+This folder houses the old NCPatcher files before I migrated to NSMB-Docker
