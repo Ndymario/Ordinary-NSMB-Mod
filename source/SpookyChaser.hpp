@@ -45,4 +45,7 @@ public:
     bool resetMusic;
 
     s32 currentTarget = settings & 0xFF;
+
+    // Reload palette to restore chaser colors after greyscale effect
+    void reloadPalette() { spookyNsbtx.reloadPalette(); }
 };

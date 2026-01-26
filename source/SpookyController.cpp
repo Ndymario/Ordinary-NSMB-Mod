@@ -48,7 +48,7 @@ void SpookyController::onCreate() {
 	isSpooky = false;
 	hasSpawnedForBoss = false;
 
-	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256];
+	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256 + 32768];
 
 	onPrepareResources();
 
@@ -310,10 +310,13 @@ void SpookyController::spookyPalette() {
 	makeRangeMonochrome(bgColors, 256 * 32);
 	GX_EndLoadBGExtPltt();
 
-	/*GX_BeginLoadTexPltt();
+	// TEXTURE PALETTE (3D models)
+	// VRAM-E is configured for texture palettes (64KB = 32768 colors)
+	GX_BeginLoadTexPltt();
 	u16* texPlttColors = getTexPltt(0);
-	makeRangeMonochrome(texPlttColors, 256 * 64);
-	GX_EndLoadTexPltt();*/
+	MI_CpuCopyFast(texPlttColors, &paletteBackup[256 + (256 * 16) + (256 * 32) + 256 + 256], 32768 * 2);
+	makeRangeMonochrome(texPlttColors, 32768);
+	GX_EndLoadTexPltt();
 
 	// BOTTOM SCREEN
 	u16* dbBgColors = rcast<u16*>(HW_DB_BG_PLTT);
@@ -339,6 +342,12 @@ void SpookyController::unspookyPalette() {
 	u16* bgColors = getBGExtPltt(0x4000);
 	MI_CpuCopyFast(&paletteBackup[256 + (256 * 16)], bgColors, 256 * 32 * 2);
 	GX_EndLoadBGExtPltt();
+
+	// TEXTURE PALETTE (3D models)
+	GX_BeginLoadTexPltt();
+	u16* texPlttColors = getTexPltt(0);
+	MI_CpuCopyFast(&paletteBackup[256 + (256 * 16) + (256 * 32) + 256 + 256], texPlttColors, 32768 * 2);
+	GX_EndLoadTexPltt();
 
 	// BOTTOM SCREEN
 	u16* dbBgColors = rcast<u16*>(HW_DB_BG_PLTT);

@@ -31,6 +31,9 @@ s32 Chaser::onCreate() {
     onPrepareResources();
 	loadResources();
 
+    // Reload palette to restore chaser colors (palette was made greyscale before chaser spawned)
+    reloadPalette();
+
     viewOffset = Vec2(50, 50);
     activeSize = Vec2(1000.0, 3000.0);
 

@@ -13,6 +13,7 @@ public:
 	void setTexture(int texID);
 	void setPalette(int palID);
 	void render(Vec3& position, Vec3& scale);
+	void reloadPalette();  // Reload palette data into VRAM
 
 private:
 	Texture tex;

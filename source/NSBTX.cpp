@@ -22,6 +22,12 @@ void NSBTX::setPalette(int palID)
 	tex.getPaletteParams(texInfo.paletteParams, palID);
 }
 
+void NSBTX::reloadPalette()
+{
+	// Reload palette data from the texture resource into VRAM
+	NNS_G3dPlttLoad(tex.texture, TRUE);
+}
+
 void NSBTX::render(Vec3& position, Vec3& scale)
 {
 	NNS_G3dGeFlushBuffer();
