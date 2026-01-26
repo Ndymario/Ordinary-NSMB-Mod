@@ -20,6 +20,8 @@ void GoalFlag_onPoleBarrierCollided_backup(void* goal, ActiveCollider* other);
 bool applyPowerup_backup(PlayerBase* player, PowerupState powerup);
 bool startSeq_backup(s32 seqID, bool restart);
 void startStageThemeSeq_backup(s32 seqID);
+void stopMusicWithFade_backup(s32 frames);
+void playPipeSfx_backup(PlayerBase* player, s32 sfxID, Vec3* pos);
 
 asm(R"(
 	GoalFlag_updateGoalGrab = 0x0213042C
@@ -47,6 +49,10 @@ void SpookyController::onCreate() {
 	isRenderingStatic = false;
 	isSpooky = false;
 	hasSpawnedForBoss = false;
+	staticDuration = 0;
+	staticDelay = 0;
+	staticDurationQueued = 0;
+	warpStaticActive = false;
 
 	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256 + 32768];
 
@@ -68,10 +74,30 @@ void SpookyController::onCreate() {
 }
 
 void SpookyController::onUpdate() {
+	if (staticDelay > 0) {
+		staticDelay--;
+		if (staticDelay == 0 && staticDurationQueued > 0) {
+			staticDuration = staticDurationQueued;
+			staticDurationQueued = 0;
+			if (warpStaticActive) {
+				isRenderingStatic = true;
+			}
+		}
+	}
 	if (!doTicks && !isRenderingStatic) {
 		return;
 	}
 	updateFunc(this);
+
+	if (warpStaticActive &&
+		staticDelay == 0 &&
+		staticDuration == 0 &&
+		staticDurationQueued == 0) {
+		if (updateFunc != ptmf_cast(&SpookyController::transitionState)) {
+			isRenderingStatic = false;
+		}
+		warpStaticActive = false;
+	}
 }
 
 void SpookyController::onRender() {
@@ -113,9 +139,28 @@ void SpookyController::onDestroy() {
 void SpookyController::onAreaChange() {
 	hasSpawnedForBoss = false;
 	onPrepareResources();
+	isRenderingStatic = false;
+	staticDuration = 0;
+	staticDelay = 0;
+	staticDurationQueued = 0;
+	warpStaticActive = false;
 	if (isSpooky) {
 		spookyPalette();
 	}
+}
+
+void SpookyController::queueWarpStatic(s32 delayFrames, s32 durationFrames) {
+	if (staticDelay > 0 || staticDuration > 0 || staticDurationQueued > 0 || isRenderingStatic) {
+		return;
+	}
+	warpStaticActive = true;
+	if (delayFrames <= 0) {
+		staticDuration = durationFrames;
+		isRenderingStatic = true;
+		return;
+	}
+	staticDelay = delayFrames;
+	staticDurationQueued = durationFrames;
 }
 
 void SpookyController::onBlockHit() {
@@ -460,8 +505,42 @@ ncp_hook(0x0201E744)
 bool SpookyController::switchArea_hook() {
 	if (instance != nullptr && instance->usingSpookyPalette) {
 		instance->unspookyPalette();
+		if (instance->staticDelay > 0) {
+			instance->staticDelay = 0;
+			if (instance->staticDurationQueued > 0) {
+				instance->staticDuration = instance->staticDurationQueued;
+				instance->staticDurationQueued = 0;
+				if (instance->warpStaticActive) {
+					instance->isRenderingStatic = true;
+				}
+			}
+		} else if (instance->staticDurationQueued > 0 &&
+		           instance->staticDuration == 0 &&
+		           !instance->isRenderingStatic) {
+			instance->staticDuration = instance->staticDurationQueued;
+			instance->staticDurationQueued = 0;
+			if (instance->warpStaticActive) {
+				instance->isRenderingStatic = true;
+			}
+		} else if (instance->staticDuration == 0 && !instance->isRenderingStatic) {
+			instance->staticDuration = 30;
+			if (instance->warpStaticActive) {
+				instance->isRenderingStatic = true;
+			}
+		}
 	}
 	return true;
+}
+
+ncp_set_call(0x0211D4A4, 10, SpookyController::playPipeSfx_hook); // pipe right
+ncp_set_call(0x0211DA9C, 10, SpookyController::playPipeSfx_hook); // pipe left
+ncp_set_call(0x0211DF90, 10, SpookyController::playPipeSfx_hook); // pipe down
+ncp_set_call(0x0211E510, 10, SpookyController::playPipeSfx_hook); // pipe up
+void SpookyController::playPipeSfx_hook(PlayerBase* player, s32 sfxID, Vec3* pos) {
+	if (instance != nullptr && instance->usingSpookyPalette) {
+		instance->queueWarpStatic(30, 60);
+	}
+	playPipeSfx_backup(player, sfxID, pos);
 }
 
 ncp_jump(0x02020354)
@@ -615,6 +694,14 @@ void SpookyController::unpauseResumeMusic(){
 	SND::pauseBGM(0);
 }
 
+ncp_call(0x0201E7B4)
+void SpookyController::stopMusicWithFade_hook(s32 frames) {
+	if (instance != nullptr && instance->isSpooky) {
+		return;
+	}
+	stopMusicWithFade_backup(frames);
+}
+
 // ------------ Backups ------------
 
 NTR_NAKED bool Game_addPlayerCoin_backup(s32 playerID) {asm(R"(
@@ -648,6 +735,16 @@ NTR_NAKED bool startSeq_backup(s32 seqID, bool restart)
 {asm(R"(
         stmdb	sp!,{r4,lr}
         B       0x02011e80
+    )");}
+
+NTR_NAKED void stopMusicWithFade_backup(s32 frames)
+{asm(R"(
+        B       0x02011df4
+    )");}
+
+NTR_NAKED void playPipeSfx_backup(PlayerBase* player, s32 sfxID, Vec3* pos)
+{asm(R"(
+        B       0x0212b838
     )");}
 
 // ------------ Utils ------------

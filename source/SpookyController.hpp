@@ -59,6 +59,9 @@ public:
 	u32 nsbtxTexID[3][4];
 	bool isRenderingStatic;
 	s32 staticDuration;
+	s32 staticDelay;
+	s32 staticDurationQueued;
+	bool warpStaticActive;
 
     static SpookyController* getInstance();
 
@@ -76,6 +79,7 @@ public:
 	static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
 	void onBlockHit();
+	void queueWarpStatic(s32 delayFrames, s32 durationFrames);
 	static void endLevel();
 	static void getOneLife_hook(s32 playerID);
 	static void playOneupSound(s32 sfxID, Vec3* pos);
@@ -99,8 +103,10 @@ public:
 	static bool applyPowerup_hook(PlayerBase* player, PowerupState powerup);
 	static void startSeq_hook(s32 seqID, bool restart);
 	static void startStageThemeSeq_hook(s32 seqID);
+	static void playPipeSfx_hook(PlayerBase* player, s32 sfxID, Vec3* pos);
 	static bool switchArea_hook();
 	static void unpauseResumeMusic();
+	static void stopMusicWithFade_hook(s32 frames);
 	static bool getWinningPlayerID(s32 starsP0, s32 starsP1);
 	//static void incrementPlayerBattleStars_hook(u32 playerNo);
 
