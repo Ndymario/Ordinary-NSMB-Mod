@@ -99,7 +99,7 @@ public:
 	static bool applyPowerup_hook(PlayerBase* player, PowerupState powerup);
 	static void startSeq_hook(s32 seqID, bool restart);
 	static void startStageThemeSeq_hook(s32 seqID);
-	static void playerBeginEnteranceTransition_hook(Player* player, EntranceType type);
+	static bool switchArea_hook();
 	static void unpauseResumeMusic();
 	static bool getWinningPlayerID(s32 starsP0, s32 starsP1);
 	//static void incrementPlayerBattleStars_hook(u32 playerNo);

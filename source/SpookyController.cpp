@@ -456,6 +456,14 @@ void SpookyController::hitBlock_hook() {
 	}
 }
 
+ncp_hook(0x0201E744)
+bool SpookyController::switchArea_hook() {
+	if (instance != nullptr && instance->usingSpookyPalette) {
+		instance->unspookyPalette();
+	}
+	return true;
+}
+
 ncp_jump(0x02020354)
 bool SpookyController::getCoin_hook(s32 playerID) {
 	if (instance != nullptr && instance->isSpooky && playerID == instance->currentTarget) {
