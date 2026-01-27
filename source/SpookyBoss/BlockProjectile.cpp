@@ -47,15 +47,15 @@ static inline void setVelocityToward(BlockProjectile& self, const Vec3& target, 
     fx32 dirX = 0fx;
     fx32 dirY = 0fx;
     if (maxc > 0fx) {
-        dirX = toTarget.x / maxc; // [-1..1]
-        dirY = toTarget.y / maxc; // [-1..1]
+        dirX = Math::div(toTarget.x, maxc); // [-1..1] in fx32
+        dirY = Math::div(toTarget.y, maxc); // [-1..1] in fx32
     } else {
         dirX = 0fx;
         dirY = -1fx;
     }
 
-    self.velocity.x = dirX * speed;
-    self.velocity.y = dirY * speed;
+    self.velocity.x = Math::mul(dirX, speed);
+    self.velocity.y = Math::mul(dirY, speed);
 }
 
 static inline s16 facingAngleFromVelocity(fx32 vx, fx32 vy) {
@@ -86,8 +86,8 @@ static inline void applyHomingTowardPlayer(BlockProjectile& self, fx32 speed, fx
     fx32 dirX = 0fx;
     fx32 dirY = 0fx;
     if (maxc > 0fx) {
-        dirX = toPlayer.x / maxc;
-        dirY = toPlayer.y / maxc;
+        dirX = Math::div(toPlayer.x, maxc);
+        dirY = Math::div(toPlayer.y, maxc);
     } else {
         dirX = 0fx;
         dirY = -1fx;
@@ -105,12 +105,12 @@ static inline void applyHomingTowardPlayer(BlockProjectile& self, fx32 speed, fx
     fx32 nay = Math::abs(newY);
     fx32 nmax = (nax > nay) ? nax : nay;
     if (nmax > 0fx) {
-        newX /= nmax;
-        newY /= nmax;
+        newX = Math::div(newX, nmax);
+        newY = Math::div(newY, nmax);
     }
 
-    self.velocity.x = newX * speed;
-    self.velocity.y = newY * speed;
+    self.velocity.x = Math::mul(newX, speed);
+    self.velocity.y = Math::mul(newY, speed);
 }
 
 bool BlockProjectile::loadResources(){
@@ -274,8 +274,8 @@ void BlockProjectile::spawn(){
                 fx32 ay = Math::abs(toPlayer.y);
                 fx32 maxc = (ax > ay) ? ax : ay;
                 if (maxc > 0fx) {
-                    dirX = toPlayer.x / maxc; // [-1..1]
-                    dirY = toPlayer.y / maxc; // [-1..1]
+                    dirX = Math::div(toPlayer.x, maxc); // [-1..1] in fx32
+                    dirY = Math::div(toPlayer.y, maxc); // [-1..1] in fx32
                 } else {
                     // Fallback tiny nudge to avoid a dead zero vector
                     dirX = (Net::getRandom() & 1) ? 1fx : -1fx;
@@ -300,18 +300,45 @@ void BlockProjectile::spawn(){
                 fx32 nay = Math::abs(newY);
                 fx32 nmax = (nax > nay) ? nax : nay;
                 if (nmax > 0fx) {
-                    dirX = newX / nmax;
-                    dirY = newY / nmax;
+                    dirX = Math::div(newX, nmax);
+                    dirY = Math::div(newY, nmax);
                 }
             }
 
             // Start with a faster initial speed per-axis
             fx32 speed = 1.0fx;
-            if (throwPattern == 1) speed = 0.85fx;
+            if (throwPattern == 1) speed = 0.25fx;
             if (throwPattern == 2) speed = 1.15fx;
             if (throwPattern == 3) speed = 1.25fx;
-            velocity.x = dirX * speed;
-            velocity.y = dirY * speed;
+            if (settings & SettingsSlowThrow) speed = 0.25fx;
+
+#ifdef NTR_DEBUG
+            Log::print(
+                "BlockProjectile spawn: settings=0x%08X patt=%u slow=%u spiked=%u fromBg=%u fixed=%u dirIdx=%u speedRaw=0x%08X speed=%d",
+                scast<u32>(settings),
+                scast<u32>(throwPattern),
+                (settings & SettingsSlowThrow) ? 1 : 0,
+                spikedVariant ? 1 : 0,
+                fromBackground ? 1 : 0,
+                useFixedDirection ? 1 : 0,
+                scast<u32>(fixedDirection),
+                scast<u32>(speed),
+                scast<s32>(speed >> 12)
+            );
+#endif
+
+            velocity.x = Math::mul(dirX, speed);
+            velocity.y = Math::mul(dirY, speed);
+
+#ifdef NTR_DEBUG
+            Log::print(
+                "BlockProjectile velocity: vxRaw=0x%08X vyRaw=0x%08X vx=%d vy=%d",
+                scast<u32>(velocity.x),
+                scast<u32>(velocity.y),
+                scast<s32>(velocity.x >> 12),
+                scast<s32>(velocity.y >> 12)
+            );
+#endif
             switchState(&BlockProjectile::bouncing);
         }
     }

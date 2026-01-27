@@ -267,25 +267,40 @@ void SpookyBoss::spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex, const Vec2
     if (spiked) {
         settings |= BlockProjectile::SettingsSpiked;
     }
+    if (phaseOneHits > 0) {
+        settings |= BlockProjectile::SettingsSlowThrow;
+    }
     if (dirIndex >= 0) {
         settings |= BlockProjectile::SettingsUseDirection;
         settings |= (scast<s32>(dirIndex) & 0x0F) << BlockProjectile::SettingsDirShift;
     }
+
+#ifdef NTR_DEBUG
+    Log::print(
+        "SpookyBoss spawnBossBlock: hits=%u pattern=%u spiked=%u dir=%d settings=0x%08X",
+        scast<u32>(phaseOneHits),
+        scast<u32>(pattern),
+        spiked ? 1 : 0,
+        scast<s32>(dirIndex),
+        scast<u32>(settings)
+    );
+#endif
 
     Actor::spawnActor(280, settings, &spawnPos);
 }
 
 void SpookyBoss::performAttackPattern(){
     const u8 hits = phaseOneHits;
+    const u8 pattern = (hits == 0) ? 0 : 1; // slower throws once he's been hit
     const Vec2 leftOffset(-16fx, 0);
     const Vec2 rightOffset(16fx, 0);
 
     if (hits == 0) {
         // Either one normal block or one spiked block
         if ((Net::getRandom() & 1) == 0) {
-            spawnBossBlock(0, false, -1);
+            spawnBossBlock(pattern, false, -1);
         } else {
-            spawnBossBlock(0, true, -1);
+            spawnBossBlock(pattern, true, -1);
         }
         return;
     }
@@ -297,15 +312,15 @@ void SpookyBoss::performAttackPattern(){
         if (patternA) {
             bool normalLeft = (Net::getRandom() & 1) == 0;
             if (normalLeft) {
-                spawnBossBlock(0, false, 0, leftOffset); // down-left normal
-                spawnBossBlock(0, true, 1, rightOffset);  // down-right spiked
+                spawnBossBlock(pattern, false, 0, leftOffset); // down-left normal
+                spawnBossBlock(pattern, true, 1, rightOffset);  // down-right spiked
             } else {
-                spawnBossBlock(0, true, 0, leftOffset);  // down-left spiked
-                spawnBossBlock(0, false, 1, rightOffset); // down-right normal
+                spawnBossBlock(pattern, true, 0, leftOffset);  // down-left spiked
+                spawnBossBlock(pattern, false, 1, rightOffset); // down-right normal
             }
         } else {
-            spawnBossBlock(0, true, 0, leftOffset); // down-left spiked
-            spawnBossBlock(0, true, 1, rightOffset); // down-right spiked
+            spawnBossBlock(pattern, true, 0, leftOffset); // down-left spiked
+            spawnBossBlock(pattern, true, 1, rightOffset); // down-right spiked
         }
         return;
     }
@@ -313,14 +328,14 @@ void SpookyBoss::performAttackPattern(){
     // hits >= 2
     bool patternB = (Net::getRandom() & 1) == 0;
     // Base: two spiked diagonally down
-    spawnBossBlock(0, true, 0, leftOffset); // down-left spiked
-    spawnBossBlock(0, true, 1, rightOffset); // down-right spiked
+    spawnBossBlock(pattern, true, 0, leftOffset); // down-left spiked
+    spawnBossBlock(pattern, true, 1, rightOffset); // down-right spiked
 
     if (patternB) {
         // Add one normal block in a random direction not equal to the two diagonals
         static const u8 dirs[] = {2, 3, 4, 5, 6, 7};
         u8 dir = dirs[Net::getRandom() % (sizeof(dirs) / sizeof(dirs[0]))];
-        spawnBossBlock(0, false, scast<s8>(dir), Vec2(0, -8fx));
+        spawnBossBlock(pattern, false, scast<s8>(dir), Vec2(0, -8fx));
     }
 }
 

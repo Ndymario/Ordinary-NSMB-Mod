@@ -97,6 +97,7 @@ public:
     static constexpr s32 SettingsReflected = 0x2;
     static constexpr s32 SettingsSpiked = 0x4;
     static constexpr s32 SettingsUseDirection = 0x8;
+    static constexpr s32 SettingsSlowThrow = 0x10; // force slower initial speed
     static constexpr s32 SettingsPatternShift = 8;
     static constexpr s32 SettingsDirShift = 16;
 
