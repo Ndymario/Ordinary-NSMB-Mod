@@ -24,8 +24,16 @@ extern "C" {
 
 // extFileID = fileID - 131
 constexpr u32 kBowserAnimExt = 0x576;     // file ID 1529: enemy/koopa_new.nsbca
+constexpr u32 kBowserModelExt = 0x577;    // file ID 1530: enemy/koopa_new.nsbmd
 constexpr u32 kBoneKoopaMdlExt = 0x4D9;   // file ID 1372: enemy/bonekoopa.nsbmd
 constexpr u32 kBoneKoopaAnmExt = 0x4DA;   // file ID 1373: enemy/bonekoopa2.nsbca
+
+static bool sDryBowserCleanupDone = false;
+
+static inline u32 align16(u32 size)
+{
+	return (size + 15) & 0xFFFFFFF0;
+}
 
 ncp_jump(0x02009C64)
 void* FS_Cache_loadFile_OVERRIDE(u32 extFileID, bool compressed)
@@ -35,6 +43,28 @@ void* FS_Cache_loadFile_OVERRIDE(u32 extFileID, bool compressed)
 		return FS_Cache_loadFileToOverlay_SUPER(extFileID, compressed);
 	}
 
+	if (extFileID == kBoneKoopaMdlExt || extFileID == kBoneKoopaAnmExt) {
+		// Dry Bowser assets: use overlay only when there is enough space.
+		u32 required = align16(FS::getFileSize(extFileID));
+		u32 freeOverlay = FS::Cache::overlayFileSize;
+		u32 bowserAnimSize = align16(FS::getFileSize(kBowserAnimExt));
+		bool canFit = (freeOverlay + bowserAnimSize) >= required;
+
+		if (canFit) {
+			// Unload Bowser resources to free RAM/overlay headroom.
+			if (!sDryBowserCleanupDone) {
+				FS::Cache::unloadFile(kBowserAnimExt);
+				FS::Cache::unloadFile(kBowserModelExt);
+				sDryBowserCleanupDone = true;
+			}
+
+			return FS_Cache_loadFileToOverlay_SUPER(extFileID, compressed);
+		}
+
+		// Fallback to RAM to avoid overlay OOM in W1 Bowser.
+		return FS_Cache_loadFile_SUPER(extFileID, compressed);
+	}
+
 	return FS_Cache_loadFile_SUPER(extFileID, compressed);
 }
 
@@ -42,8 +72,11 @@ ncp_jump(0x02009C14)
 void* FS_Cache_loadFileToOverlay_OVERRIDE(u32 extFileID, bool compressed)
 {
 	if (extFileID == kBoneKoopaMdlExt || extFileID == kBoneKoopaAnmExt) {
-		// Keep Dry Bones assets in main RAM to preserve overlay space.
-		return FS_Cache_loadFile_SUPER(extFileID, compressed);
+		u32 required = align16(FS::getFileSize(extFileID));
+		if (FS::Cache::overlayFileSize < required) {
+			// Not enough overlay space; fall back to RAM.
+			return FS_Cache_loadFile_SUPER(extFileID, compressed);
+		}
 	}
 
 	return FS_Cache_loadFileToOverlay_SUPER(extFileID, compressed);
