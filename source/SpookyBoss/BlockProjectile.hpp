@@ -11,6 +11,8 @@ private:
     // State machine functions
     void spawn();
     void bouncing();
+    void returnToBoss();
+    void despawn();
     void idle();
 
     // Collsion handlers
@@ -79,19 +81,24 @@ public:
     };
 
     static constexpr AcConfig activeColliderInfo = {
-        -10fx, //left
-        9fx, //top
-        7fx, //right
-        -10fx, //bottom
+        { 0fx, 0fx, 10fx, 10fx }, // rect: xOffset, yOffset, halfWidth, halfHeight
         AcGroup::Entity,
         AcAttack::None,
         AC_GROUP_MASK(AcGroup::Player, AcGroup::PlayerSpecial, AcGroup::Entity, AcGroup::Fireball),
-        AC_ATTACK_MASK_EXC(AcAttack::None),
+        AC_ATTACK_MASK_INC(AcAttack::None),
         0,
         BlockProjectile::activeCallback
     };
 
     Collider collider;
+
+    // Settings bit masks (shared with SpookyBoss hit detection)
+    static constexpr s32 SettingsFromBackground = 0x1;
+    static constexpr s32 SettingsReflected = 0x2;
+    static constexpr s32 SettingsSpiked = 0x4;
+    static constexpr s32 SettingsUseDirection = 0x8;
+    static constexpr s32 SettingsPatternShift = 8;
+    static constexpr s32 SettingsDirShift = 16;
 
     static constexpr u16 updatePriority = objectID;
     static constexpr u16 renderPriority = objectID;
@@ -101,12 +108,44 @@ public:
     u8 blockPalette = 0;
     OAM::Flags oamFlags = OAM::Flags::None;
     OAM::Settings oamSettings = OAM::Settings::None;
+    u8 oamPriority = 3; // dynamic OAM priority (3 background -> 0 foreground)
     bool flipX = false;
     bool flipY = false;
-    s16 rot = 32767;
+    u16 rot = 0;
     Vec2 oamScale;
     u32 frameCounter = 0;
     Vec3 toPlayer;
+    Vec3 lastPos;
+    u8 stillFrames = 0;          // counts frames with negligible movement
+    static constexpr u8 stuckLimit = 10;     // fail after 10 frames
+    static constexpr fx32 minMoveThreshold = 0.02fx; // min movement per frame considered "significant"
+    u8 stuckGrace = 20;           // skip stuck check for first N frames of bouncing
+    
+    // Background entry parameters
+    bool fromBackground = false; // set from settings bit 0
+    u8 throwPattern = 0;         // optional pattern (settings >> 8)
+    u16 enterFrames = 0;         // counts frames during entry
+    u16 enterDuration = 12;      // how long to scale-in before switching to bouncing
+
+    // Reflection/return behavior
+    bool reflected = false;
+    u16 returnTimer = 0;
+    static constexpr u16 returnDuration = 90;
+    static constexpr fx32 returnSpeed = 1.6fx;
+
+    // Spiked variant (hazard) behavior
+    bool spikedVariant = false;
+    u8 bounceCount = 0;
+    static constexpr u8 spikeBounceLimit = 5;
+    u8 normalBounceCount = 0;
+    static constexpr u8 normalBounceLimit = 3;
+    bool despawning = false;
+    u8 despawnTimer = 0;
+    static constexpr u8 despawnFrames = 10;
+
+    // Optional fixed direction override (for scripted patterns)
+    bool useFixedDirection = false;
+    u8 fixedDirection = 0;
 
     // Cached zone info to avoid per-frame allocations
     Rectangle<fx32> zoneRect = Rectangle<fx32>(0, 0, 0, 0);
