@@ -98,7 +98,6 @@ public:
     static constexpr s32 SettingsSpiked = 0x4;
     static constexpr s32 SettingsUseDirection = 0x8;
     static constexpr s32 SettingsSlowThrow = 0x10; // force slower initial speed
-    static constexpr s32 SettingsManualRot = 0x20; // debug: manual rotation control
     static constexpr s32 SettingsPatternShift = 8;
     static constexpr s32 SettingsDirShift = 16;
 
@@ -137,7 +136,6 @@ public:
 
     // Spiked variant (hazard) behavior
     bool spikedVariant = false;
-    bool manualRot = false;
     u8 bounceCount = 0;
     static constexpr u8 spikeBounceLimit = 5;
     u8 normalBounceCount = 0;

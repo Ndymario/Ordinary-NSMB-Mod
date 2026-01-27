@@ -3,7 +3,6 @@
 #include "SpookyController.hpp"
 #include "BlockProjectile.hpp"
 #include "util/collisionviewer.hpp"
-#include <nsmb/core/system/input.hpp>
 
 ncp_over(0x020c560c, 0) const ObjectInfo objectInfo = SpookyBoss::objectInfo; //Stage Object ID 44 (use this in the editor)
 ncp_over(0x02039a34) static constexpr const ActorProfile* profile = &SpookyBoss::profile; //objectID 46
@@ -12,40 +11,6 @@ static void copyChunk(u32 source, u32 destination);
 static inline void refreshChunks();
 
 SpookyBoss* SpookyBoss::instance = nullptr;
-
-#ifdef NTR_DEBUG
-static BlockProjectile* debugSpike = nullptr;
-static u16 debugSpikeRot = 0;
-static constexpr u16 debugRotStep = 0x200;
-
-static void updateDebugSpike(SpookyBoss& boss) {
-    Player* player = Game::getLocalPlayer();
-    if (!player) return;
-
-    if (debugSpike == nullptr || debugSpike->destroyFlag) {
-        Vec3 spawnPos = boss.position;
-        spawnPos.y += 16fx;
-
-        s32 settings = 0;
-        settings |= BlockProjectile::SettingsSpiked;
-        settings |= BlockProjectile::SettingsManualRot;
-
-        debugSpike = scast<BlockProjectile*>(Actor::spawnActor(280, settings, &spawnPos));
-        debugSpikeRot = 0;
-    }
-
-    if (debugSpike == nullptr || debugSpike->destroyFlag) return;
-
-    u16 keysHeld = player->keysHeld;
-    if (keysHeld & Keys::L) {
-        debugSpikeRot = scast<u16>(debugSpikeRot + debugRotStep);
-    }
-    if (keysHeld & Keys::R) {
-        debugSpikeRot = scast<u16>(debugSpikeRot - debugRotStep);
-    }
-    debugSpike->rot = debugSpikeRot;
-}
-#endif
 
 bool SpookyBoss::loadResources() {
     FS::Cache::loadFile(bossModelID, false);
@@ -106,9 +71,6 @@ bool SpookyBoss::updateMain(){
     updateAnimation();
     if (invulnTimer > 0) invulnTimer--;
     updateFunc(this);
-#ifdef NTR_DEBUG
-    updateDebugSpike(*this);
-#endif
 	return true;
 }
 
@@ -155,11 +117,7 @@ void SpookyBoss::introAnimation(){
         model.init(1, FrameCtrl::Type::Standard, 1fx, 0);
 
         if(model.frameController.finished()){
-#ifdef NTR_DEBUG
-            return; // debug: hold here so boss doesn't enter mimic state
-#else
             switchState(&SpookyBoss::mimicState);
-#endif
         }
     }
 

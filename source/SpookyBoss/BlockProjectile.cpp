@@ -16,8 +16,8 @@ static GXOamAttr** BlockProjectileOAM = rcast<GXOamAttr**>(0x0212f180);
 static constexpr u32 RotatingSpikeOamIndex = 9; // matches ov54 table entry for spiked block
 
 static constexpr u8 spikePaletteOffset = 0;
-static constexpr fx32 spikeHurtOffset = 12fx;
-static constexpr fx32 spikeHurtRadius = 6fx;
+static constexpr fx32 spikeHurtOffset = 8fx;
+static constexpr fx32 spikeHurtRadius = 7fx;
 
 // OAM::drawSprite expects rotation as an unsigned 0..0xFFFF value in practice.
 // Call it via a u16 signature to avoid sign-extension for angles > 0x7FFF.
@@ -157,7 +157,6 @@ s32 BlockProjectile::onCreate(){
     reflected      = (settings & SettingsReflected) != 0;
     spikedVariant  = (settings & SettingsSpiked) != 0;
     useFixedDirection = (settings & SettingsUseDirection) != 0;
-    manualRot      = (settings & SettingsManualRot) != 0;
     fixedDirection    = scast<u8>((settings >> SettingsDirShift) & 0x0F);
     throwPattern   = scast<u8>((settings >> SettingsPatternShift) & 0xFF);
 
@@ -241,11 +240,9 @@ bool BlockProjectile::updateMain(){
     CollisionViewer::renderActiveCollider(activeCollider, CollisionViewer::Flags::ActiveCollider);
 	updateFunc(this);
     if (spikedVariant) {
-        if (!manualRot) {
-            // Use full-circle 0..0xFFFF rotation so scale stays correct in all quadrants
-            u16 angle = scast<u16>(Math::atan2(velocity.y, velocity.x));
-            rot = scast<u16>(0x4000 - angle); // sprite faces up by default
-        }
+        // Use full-circle 0..0xFFFF rotation so scale stays correct in all quadrants
+        u16 angle = scast<u16>(Math::atan2(velocity.y, velocity.x));
+        rot = scast<u16>(0x4000 - angle); // sprite faces up by default
         updateSpikeHurtbox(*this);
     }
 	return true;
@@ -336,35 +333,9 @@ void BlockProjectile::spawn(){
             if (throwPattern == 2) speed = 1.15fx;
             if (throwPattern == 3) speed = 1.25fx;
             if (settings & SettingsSlowThrow) speed = 0.25fx;
-            if (manualRot) speed = 0fx;
-
-#ifdef NTR_DEBUG
-            Log::print(
-                "BlockProjectile spawn: settings=0x%08X patt=%u slow=%u spiked=%u fromBg=%u fixed=%u dirIdx=%u speedRaw=0x%08X speed=%d",
-                scast<u32>(settings),
-                scast<u32>(throwPattern),
-                (settings & SettingsSlowThrow) ? 1 : 0,
-                spikedVariant ? 1 : 0,
-                fromBackground ? 1 : 0,
-                useFixedDirection ? 1 : 0,
-                scast<u32>(fixedDirection),
-                scast<u32>(speed),
-                scast<s32>(speed >> 12)
-            );
-#endif
 
             velocity.x = Math::mul(dirX, speed);
             velocity.y = Math::mul(dirY, speed);
-
-#ifdef NTR_DEBUG
-            Log::print(
-                "BlockProjectile velocity: vxRaw=0x%08X vyRaw=0x%08X vx=%d vy=%d",
-                scast<u32>(velocity.x),
-                scast<u32>(velocity.y),
-                scast<s32>(velocity.x >> 12),
-                scast<s32>(velocity.y >> 12)
-            );
-#endif
             switchState(&BlockProjectile::bouncing);
         }
     }
@@ -488,13 +459,6 @@ void BlockProjectile::bouncing(){
         }
 
         collider.updatePosition();
-
-        // Debug/manual rotation blocks should remain stationary without respawning
-        if (manualRot) {
-            stillFrames = 0;
-            lastPos = position;
-            return;
-        }
 
         // Failsafe: if movement is negligible for multiple frames, respawn a fresh block
         if (stuckGrace > 0) {
