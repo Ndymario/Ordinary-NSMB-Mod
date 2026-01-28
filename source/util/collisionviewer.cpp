@@ -435,7 +435,12 @@ namespace CollisionViewer {
 
 				Game::wrapPosition(box.x);
 
-				renderCircle(box, ColorActiveCollider, false);
+				if (u.sharedData != 0) {
+					s32 start = scast<s32>(0x10000 - (u.sharedData & 0xFFFF));
+					renderArc(box, start, 180deg, ColorActiveCollider, false);
+				} else {
+					renderCircle(box, ColorActiveCollider, false);
+				}
 
 				if (Game::wrapType == WrapType::Static) {
 
@@ -444,7 +449,12 @@ namespace CollisionViewer {
 
 					box.x += 256.0fx;
 
-					renderCircle(box, ColorActiveCollider, false);
+					if (u.sharedData != 0) {
+						s32 start = scast<s32>(0x10000 - (u.sharedData & 0xFFFF));
+						renderArc(box, start, 180deg, ColorActiveCollider, false);
+					} else {
+						renderCircle(box, ColorActiveCollider, false);
+					}
 
 				}
 
