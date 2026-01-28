@@ -634,7 +634,7 @@ void SpookyController::doNotUpdateSomeDbObjPltt_hook(void* stage) {
 ncp_jump(0x0212b9f8, 11)
 bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState powerup)
 {
-	if (instance != nullptr && instance->isSpooky && !Game::vsMode){
+	if (instance != nullptr && instance->isSpooky && !Game::vsMode && !instance->finalBoss){
 		instance->onBlockHit();
 		return true;
 	} else {
