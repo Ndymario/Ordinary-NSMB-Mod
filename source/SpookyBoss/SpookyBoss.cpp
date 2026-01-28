@@ -247,16 +247,16 @@ void SpookyBoss::mimicState(){
 }
 
 // Spawn a block projectile from Luigi's position (targeting Mario)
-void SpookyBoss::spawnBossBlock(u8 pattern){
-    spawnBossBlock(pattern, false, -1);
+BlockProjectile* SpookyBoss::spawnBossBlock(u8 pattern){
+    return spawnBossBlock(pattern, false, -1);
 }
 
 // Spawn a block projectile from Luigi's position with optional variants/direction
-void SpookyBoss::spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex){
-    spawnBossBlock(pattern, spiked, dirIndex, Vec2(0, 0));
+BlockProjectile* SpookyBoss::spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex){
+    return spawnBossBlock(pattern, spiked, dirIndex, Vec2(0, 0));
 }
 
-void SpookyBoss::spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex, const Vec2& offset){
+BlockProjectile* SpookyBoss::spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex, const Vec2& offset, fx32 speedScale){
     Vec3 spawnPos = position;
     spawnPos.y += 16fx; // lower to avoid ceiling collisions
     spawnPos.x += offset.x;
@@ -286,7 +286,11 @@ void SpookyBoss::spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex, const Vec2
     );
 #endif
 
-    Actor::spawnActor(280, settings, &spawnPos);
+    BlockProjectile* proj = scast<BlockProjectile*>(Actor::spawnActor(280, settings, &spawnPos));
+    if (proj) {
+        proj->speedScale = speedScale;
+    }
+    return proj;
 }
 
 void SpookyBoss::performAttackPattern(){
@@ -313,14 +317,14 @@ void SpookyBoss::performAttackPattern(){
             bool normalLeft = (Net::getRandom() & 1) == 0;
             if (normalLeft) {
                 spawnBossBlock(pattern, false, 0, leftOffset); // down-left normal
-                spawnBossBlock(pattern, true, 1, rightOffset);  // down-right spiked
+                spawnBossBlock(pattern, true, 1, rightOffset, 5.0fx);  // down-right spiked
             } else {
-                spawnBossBlock(pattern, true, 0, leftOffset);  // down-left spiked
+                spawnBossBlock(pattern, true, 0, leftOffset, 5.0fx);  // down-left spiked
                 spawnBossBlock(pattern, false, 1, rightOffset); // down-right normal
             }
         } else {
-            spawnBossBlock(pattern, true, 0, leftOffset); // down-left spiked
-            spawnBossBlock(pattern, true, 1, rightOffset); // down-right spiked
+            spawnBossBlock(pattern, true, 0, leftOffset, 5.0fx); // down-left spiked
+            spawnBossBlock(pattern, true, 1, rightOffset, 5.0fx); // down-right spiked
         }
         return;
     }
@@ -328,8 +332,8 @@ void SpookyBoss::performAttackPattern(){
     // hits >= 2
     bool patternB = (Net::getRandom() & 1) == 0;
     // Base: two spiked diagonally down
-    spawnBossBlock(pattern, true, 0, leftOffset); // down-left spiked
-    spawnBossBlock(pattern, true, 1, rightOffset); // down-right spiked
+    spawnBossBlock(pattern, true, 0, leftOffset, 8.0fx); // down-left spiked
+    spawnBossBlock(pattern, true, 1, rightOffset, 8.0fx); // down-right spiked
 
     if (patternB) {
         // Add one normal block in a random direction not equal to the two diagonals

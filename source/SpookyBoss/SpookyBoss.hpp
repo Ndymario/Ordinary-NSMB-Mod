@@ -2,6 +2,8 @@
 
 #include "nsmb.hpp"
 
+class BlockProjectile;
+
 class SpookyBoss: public StageEntity3DAnm {
 private:
     // Model stuff
@@ -24,9 +26,9 @@ private:
     void mimicState();
     void mimicDamage();
     void mimicDefeated();
-    void spawnBossBlock(u8 pattern = 0);
-    void spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex);
-    void spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex, const Vec2& offset);
+    BlockProjectile* spawnBossBlock(u8 pattern = 0);
+    BlockProjectile* spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex);
+    BlockProjectile* spawnBossBlock(u8 pattern, bool spiked, s8 dirIndex, const Vec2& offset, fx32 speedScale = 1.0fx);
     void performAttackPattern();
     Vec3 mirrorPosition;
     Rectangle<fx32> zoneRect = Rectangle<fx32>(0, 0, 0, 0);

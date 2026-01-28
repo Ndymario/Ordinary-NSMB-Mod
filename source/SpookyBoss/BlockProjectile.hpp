@@ -121,6 +121,9 @@ public:
     static constexpr u8 stuckLimit = 10;     // fail after 10 frames
     static constexpr fx32 minMoveThreshold = 0.02fx; // min movement per frame considered "significant"
     u8 stuckGrace = 20;           // skip stuck check for first N frames of bouncing
+
+    // Speed scaling (applied to initial throw speed)
+    fx32 speedScale = 1.0fx;
     
     // Background entry parameters
     bool fromBackground = false; // set from settings bit 0

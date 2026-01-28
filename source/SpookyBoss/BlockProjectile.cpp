@@ -137,10 +137,53 @@ void BlockProjectile::prepareResources(){
 
 void BlockProjectile::activeCallback(ActiveCollider& self, ActiveCollider& other){
     if (!self.owner || !other.owner) return;
+
+    // Block vs block bounce
+    if (other.owner->id == BlockProjectile::objectID) {
+        BlockProjectile& a = scast<BlockProjectile&>(*self.owner);
+        BlockProjectile& b = scast<BlockProjectile&>(*other.owner);
+        if (a.despawning || b.despawning) return;
+        if (a.guid > b.guid) return; // handle once
+
+        fx32 dx = a.position.x - b.position.x;
+        fx32 dy = a.position.y - b.position.y;
+        if (Math::abs(dx) >= Math::abs(dy)) {
+            fx32 tmp = a.velocity.x;
+            a.velocity.x = b.velocity.x;
+            b.velocity.x = tmp;
+            fx32 push = 2fx;
+            if (dx >= 0fx) {
+                a.position.x += push;
+                b.position.x -= push;
+            } else {
+                a.position.x -= push;
+                b.position.x += push;
+            }
+        } else {
+            fx32 tmp = a.velocity.y;
+            a.velocity.y = b.velocity.y;
+            b.velocity.y = tmp;
+            fx32 push = 2fx;
+            if (dy >= 0fx) {
+                a.position.y += push;
+                b.position.y -= push;
+            } else {
+                a.position.y -= push;
+                b.position.y += push;
+            }
+        }
+        a.collider.updatePosition();
+        b.collider.updatePosition();
+        return;
+    }
+
     BlockProjectile& proj = scast<BlockProjectile&>(*self.owner);
     if (!proj.spikedVariant) return;
     if (other.owner->actorType != ActorType::Player) return;
     Player& player = scast<Player&>(*other.owner);
+    if (player.damageCooldown > 0 || player.subActionFlag.invincible || player.physicsFlag.starman) {
+        return;
+    }
     player.damage(proj, 0, 0, PlayerDamageType::Hit);
 }
 
@@ -159,6 +202,7 @@ s32 BlockProjectile::onCreate(){
     useFixedDirection = (settings & SettingsUseDirection) != 0;
     fixedDirection    = scast<u8>((settings >> SettingsDirShift) & 0x0F);
     throwPattern   = scast<u8>((settings >> SettingsPatternShift) & 0xFF);
+    speedScale = 1.0fx;
 
     // Default scale/priority
     if (fromBackground) {
@@ -333,6 +377,7 @@ void BlockProjectile::spawn(){
             if (throwPattern == 2) speed = 1.15fx;
             if (throwPattern == 3) speed = 1.25fx;
             if (settings & SettingsSlowThrow) speed = 0.25fx;
+            speed = Math::mul(speed, speedScale);
 
             velocity.x = Math::mul(dirX, speed);
             velocity.y = Math::mul(dirY, speed);
