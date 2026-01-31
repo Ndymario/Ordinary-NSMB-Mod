@@ -64,6 +64,8 @@ private:
     fx32 hoverOffset = 32fx;       // how far above the player to hover
     u16 moveTimer = 0;             // countdown to pick a new target
     Vec3 moveTarget = Vec3(0,0,0); // current target when lerping
+    fx32 moveVelX = 0fx;           // constant X velocity during interval
+    fx32 moveVelY = 0fx;           // constant Y velocity toward target
     bool teleportMode = false;     // whether the current interval is a teleport
     bool wonderMode = false;       // wander around arena before next RNG pick
     u16  wonderTimer = 0;          // total duration of current wander

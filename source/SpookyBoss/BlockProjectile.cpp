@@ -267,7 +267,11 @@ s32 BlockProjectile::onRender(){
                 OAM::drawSprite(BlockProjectileOAM[blockPalette % 4], position.x, position.y, oamFlags | prioFlag, 0, 0, &oamScale, 0, nullptr, oamSettings);
             }
         } else {
-            OAM::drawSprite(BlockProjectileOAM[blockPalette % 4], position.x, position.y, oamFlags | prioFlag, 0, 0, &oamScale, 0, nullptr, oamSettings);
+            if (reflected) {
+                drawSpriteU16(BlockProjectileOAM[blockPalette % 4], position.x, position.y, oamFlags | prioFlag, 0, 0, &oamScale, rot, nullptr, oamSettings);
+            } else {
+                OAM::drawSprite(BlockProjectileOAM[blockPalette % 4], position.x, position.y, oamFlags | prioFlag, 0, 0, &oamScale, 0, nullptr, oamSettings);
+            }
         }
     }
     
@@ -584,6 +588,10 @@ void BlockProjectile::returnToBoss(){
         scale = Vec3(1.0fx, 1.0fx, 1.0fx);
         oamPriority = 0;
         returnTimer = returnDuration;
+        if (!spikedVariant) {
+            spinTimer = spinDuration;
+            rot = 0;
+        }
         updateStep = 1;
         return;
     }
@@ -598,9 +606,20 @@ void BlockProjectile::returnToBoss(){
             return;
         }
 
+        if (!spikedVariant && spinTimer > 0) {
+            // Spin in place before homing back to the boss.
+            spinTimer--;
+            rot = scast<u16>(rot + spinStep);
+            collider.updatePosition();
+            return;
+        }
+
         Vec3 target = boss->position;
         target.y += 24fx;
         setVelocityToward(*this, target, returnSpeed);
+        // Face the boss while homing in.
+        u16 angle = scast<u16>(Math::atan2(velocity.y, velocity.x));
+        rot = scast<u16>(0x4000 - angle); // sprite faces up by default
         applyMovement();
 
         // Keep inside arena bounds

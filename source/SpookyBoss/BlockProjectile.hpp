@@ -136,6 +136,9 @@ public:
     u16 returnTimer = 0;
     static constexpr u16 returnDuration = 90;
     static constexpr fx32 returnSpeed = 1.6fx;
+    u16 spinTimer = 0;
+    static constexpr u16 spinDuration = 120; // 2s at 60fps
+    static constexpr u16 spinStep = 0x900;   // rotation step per frame (faster spin)
 
     // Spiked variant (hazard) behavior
     bool spikedVariant = false;

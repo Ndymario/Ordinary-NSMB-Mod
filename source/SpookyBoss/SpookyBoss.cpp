@@ -156,7 +156,8 @@ void SpookyBoss::mimicState(){
         bossTimer = getAttackIntervalForHits(phaseOneHits);
         moveTimer = 0;
         throwPauseTimer = 0;
-        anchorY = initialPosition.y;
+        // Prefer the same Y level as the phase-one attack position (lower than top-center).
+        anchorY = zone ? (zoneRect.y - 40fx) : (initialPosition.y - 32fx);
         return;
     }
 
@@ -191,7 +192,7 @@ void SpookyBoss::mimicState(){
         // Move to the top-center of the arena while winding up
         if (zone) {
             fx32 topCenterX = zoneRect.x + (zoneRect.width / 2);
-            fx32 topCenterY = zoneRect.y - 8fx;
+            fx32 topCenterY = anchorY;
             Vec3 topCenter = Vec3(topCenterX, topCenterY, position.z);
             position.lerp(topCenter, 0.08fx);
         }
@@ -205,51 +206,91 @@ void SpookyBoss::mimicState(){
 
     // Perform hovering movement during steps 1 and 3
     if (updateStep == 1 || updateStep == 3) {
+        // Ensure we have a valid zone rect before clamping.
+        if (!zone) {
+            zone = StageZone::get(0, &zoneRect);
+        }
+        const bool zoneValid = zone && (zoneRect.width > 0) && (zoneRect.height > 0);
+
         // Boundaries (keep a small margin inside the zone)
-        fx32 minX = zoneRect.x + 8fx;
-        fx32 maxX = zoneRect.x + zoneRect.width - 8fx;
-        fx32 maxY = zoneRect.y - 8fx; // top
-        fx32 minY = zoneRect.y - zoneRect.height + 8fx; // bottom
+        fx32 minX;
+        fx32 maxX;
+        fx32 maxY;
+        fx32 minY;
+        if (zoneValid) {
+            minX = zoneRect.x + 8fx;
+            maxX = zoneRect.x + zoneRect.width - 8fx;
+            maxY = zoneRect.y - 8fx; // top
+            minY = zoneRect.y - zoneRect.height + 8fx; // bottom
+        } else {
+            // Fallback bounds so movement still works if the zone isn't resolved yet.
+            minX = initialPosition.x - 96fx;
+            maxX = initialPosition.x + 96fx;
+            maxY = anchorY + 10fx;
+            minY = anchorY - 10fx;
+        }
 
-        // Pick a new target at random intervals
+        // Pick a new velocity/target at random intervals for ghost-like drift.
         if (moveTimer == 0) {
-            // Rare teleport to reposition without being too chaotic
-            teleportMode = scast<bool>((Net::getRandom() % 100) < 2);
+            // No teleports during phase one; keep constant motion.
+            teleportMode = false;
 
-            // X: hover around Mario with left/right offsets
-            s32 offset = 32 + scast<s32>(Net::getRandom() % 49); // [32, 80]
-            if ((Net::getRandom() % 2) == 0) offset = -offset;
-            fx32 targetX = player->position.x + scast<fx32>(offset);
+            // Speed multipliers based on hits (X scales more than Y).
+            fx32 hitsFx = scast<fx32>(phaseOneHits) * 1fx;
+            fx32 xMul = 1.0fx + Math::mul(hitsFx, 0.20fx);
+            fx32 yMul = 1.0fx + Math::mul(hitsFx, 0.10fx);
 
-            // Y: stay near initial spawn height with small variance
-            s32 yVariance = scast<s32>(Net::getRandom() % 41) - 20; // [-20, 20]
-            fx32 targetY = anchorY + scast<fx32>(yVariance);
+            // X: constant velocity, altered every interval (in fx units).
+            s32 speedHundredths = 35 + scast<s32>(Net::getRandom() % 51); // [0.35, 0.85]
+            fx32 speed = scast<fx32>(speedHundredths) * 0.01fx;
+            bool goRight = (Net::getRandom() & 1) != 0;
+            if (position.x < minX + 16fx) goRight = true;
+            if (position.x > maxX - 16fx) goRight = false;
+            speed = Math::mul(speed, xMul);
+            moveVelX = goRight ? speed : -speed;
 
-            if (targetX < minX) targetX = minX;
-            if (targetX > maxX) targetX = maxX;
+            // Y: stay near the attack height with slight variance (+/-10fx).
+            fx32 yVariance = scast<fx32>(scast<s32>(Net::getRandom() % 21) - 10) * 1fx; // [-10fx, 10fx]
+            fx32 targetY = anchorY + yVariance;
+
             if (targetY > maxY) targetY = maxY;
             if (targetY < minY) targetY = minY;
 
-            moveTarget = Vec3(targetX, targetY, position.z);
+            moveTarget = Vec3(position.x, targetY, position.z);
 
             // Duration for this interval: slower pacing for smoother motion
-            moveTimer = 48 + scast<u16>(Net::getRandom() % 97);
+            moveTimer = 30 + scast<u16>(Net::getRandom() % 91);
 
-            if (teleportMode) {
-                position.x = moveTarget.x;
-                position.y = moveTarget.y;
-            }
+            // Constant Y speed toward target per interval.
+            s32 ySpeedHundredths = 8 + scast<s32>(Net::getRandom() % 13); // [0.08, 0.20]
+            moveVelY = scast<fx32>(ySpeedHundredths) * 0.01fx;
+            moveVelY = Math::mul(moveVelY, yMul);
         } else {
-            // Lerp towards target if not teleport interval
-            if (!teleportMode) {
-                position.lerp(moveTarget, 0.05fx);
+            // Constant X velocity
+            position.x += moveVelX;
+
+            // Constant Y velocity toward target
+            fx32 dy = moveTarget.y - position.y;
+            fx32 absDy = Math::abs(dy);
+            if (absDy <= moveVelY) {
+                position.y = moveTarget.y;
+            } else {
+                position.y += (dy > 0) ? moveVelY : -moveVelY;
             }
             moveTimer--;
         }
 
-        // Clamp inside zone just in case
-        if (position.x < minX) position.x = minX;
-        if (position.x > maxX) position.x = maxX;
+        // Clamp inside zone (or fallback bounds) just in case
+        if (position.x < minX) {
+            position.x = minX;
+            moveVelX = Math::abs(moveVelX);
+            moveTimer = 0;
+        }
+        if (position.x > maxX) {
+            position.x = maxX;
+            moveVelX = -Math::abs(moveVelX);
+            moveTimer = 0;
+        }
         if (position.y > maxY) position.y = maxY;
         if (position.y < minY) position.y = minY;
     }
