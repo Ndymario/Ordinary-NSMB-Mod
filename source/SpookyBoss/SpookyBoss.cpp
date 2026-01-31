@@ -3,7 +3,6 @@
 #include "SpookyController.hpp"
 #include "BlockProjectile.hpp"
 #include "util/collisionviewer.hpp"
-#include <nsmb/game/stage/layout/data/entrance.hpp>
 
 ncp_over(0x020c560c, 0) const ObjectInfo objectInfo = SpookyBoss::objectInfo; //Stage Object ID 44 (use this in the editor)
 ncp_over(0x02039a34) static constexpr const ActorProfile* profile = &SpookyBoss::profile; //objectID 46
@@ -156,6 +155,7 @@ void SpookyBoss::mimicState(){
         bossTimer = getAttackIntervalForHits(phaseOneHits);
         moveTimer = 0;
         throwPauseTimer = 0;
+        firstAttack = true;
         // Prefer the same Y level as the phase-one attack position (lower than top-center).
         anchorY = zone ? (zoneRect.y - 40fx) : (initialPosition.y - 32fx);
         return;
@@ -355,8 +355,11 @@ void SpookyBoss::performAttackPattern(){
     const Vec2 rightOffset(16fx, 0);
 
     if (hits == 0) {
-        // Either one normal block or one spiked block
-        if ((Net::getRandom() & 1) == 0) {
+        // First attack is guaranteed to be spiked.
+        if (firstAttack) {
+            firstAttack = false;
+            spawnBossBlock(pattern, true, -1);
+        } else if ((Net::getRandom() & 1) == 0) {
             spawnBossBlock(pattern, false, -1);
         } else {
             spawnBossBlock(pattern, true, -1);

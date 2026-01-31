@@ -55,6 +55,7 @@ private:
     u16 respawnTimer = 0;
     // Required hits to finish phase one
     static constexpr u8 requiredHits = 3;
+    bool firstAttack = true;
 
     // Flip the fight view to the sub screen when true
     static bool fightOnSubScreen;
