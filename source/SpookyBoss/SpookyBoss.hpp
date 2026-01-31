@@ -56,6 +56,10 @@ private:
     // Required hits to finish phase one
     static constexpr u8 requiredHits = 3;
 
+    // Flip the fight view to the sub screen when true
+    static bool fightOnSubScreen;
+    void applyFightScreenFlag();
+
     // Hover/movement behavior during mimic phase
     fx32 hoverOffset = 32fx;       // how far above the player to hover
     u16 moveTimer = 0;             // countdown to pick a new target

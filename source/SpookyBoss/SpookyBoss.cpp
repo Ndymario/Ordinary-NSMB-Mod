@@ -3,6 +3,7 @@
 #include "SpookyController.hpp"
 #include "BlockProjectile.hpp"
 #include "util/collisionviewer.hpp"
+#include <nsmb/game/stage/layout/data/entrance.hpp>
 
 ncp_over(0x020c560c, 0) const ObjectInfo objectInfo = SpookyBoss::objectInfo; //Stage Object ID 44 (use this in the editor)
 ncp_over(0x02039a34) static constexpr const ActorProfile* profile = &SpookyBoss::profile; //objectID 46
@@ -11,6 +12,7 @@ static void copyChunk(u32 source, u32 destination);
 static inline void refreshChunks();
 
 SpookyBoss* SpookyBoss::instance = nullptr;
+bool SpookyBoss::fightOnSubScreen = false;
 
 bool SpookyBoss::loadResources() {
     FS::Cache::loadFile(bossModelID, false);
@@ -26,6 +28,9 @@ s32 SpookyBoss::onCreate(){
     ctrl->switchState(&SpookyController::waitSpawnChaserState);
     ctrl->doTicks = false;
     ctrl->finalBoss = true;
+
+    // Clear the screen flip flag
+    fightOnSubScreen = false;
 
     // Remove spooky mode if needed
     if(ctrl->usingSpookyPalette){
@@ -68,6 +73,15 @@ s32 SpookyBoss::onDestroy(){
 bool SpookyBoss::updateMain(){
     // Render collision debugging, mirroring BlockProjectile implementation
     CollisionViewer::renderActiveCollider(activeCollider, CollisionViewer::Flags::ActiveCollider);
+    // Enforce the screen swap each frame so it takes effect immediately in-stage.
+    {
+        volatile u16* powcnt = rcast<volatile u16*>(0x04000304);
+        if (fightOnSubScreen) {
+            *powcnt &= 0x7FFF;
+        } else {
+            *powcnt |= 0x8000;
+        }
+    }
     updateAnimation();
     if (invulnTimer > 0) invulnTimer--;
     updateFunc(this);
@@ -410,6 +424,8 @@ void SpookyBoss::activeCallback(ActiveCollider& self, ActiveCollider& other){
     boss.phaseOneHits++;
     boss.invulnTimer = 60; // brief invulnerability
     SND::playSFXUnique(380);
+    // Flip the screen
+    SpookyBoss::fightOnSubScreen = !SpookyBoss::fightOnSubScreen;
 
     // Reset attack cadence based on new hit count
     boss.bossTimer = getAttackIntervalForHits(boss.phaseOneHits);
