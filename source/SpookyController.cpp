@@ -10,6 +10,7 @@ static u16* getTexPltt(u32 destSlotAddr);
 static u16 makeMonochrome(u16 color);
 static void makeRangeMonochrome(u16* startAddr, u32 count);
 static Player* getLeftmostPlayer();
+static bool isStageScenePaused(void* stageScene);
 
 static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
 static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
@@ -163,6 +164,19 @@ void SpookyController::queueWarpStatic(s32 delayFrames, s32 durationFrames) {
 	staticDurationQueued = durationFrames;
 }
 
+bool SpookyController::shouldPauseTimer() const {
+	Player* player = Game::vsMode ? Game::getPlayer(currentTarget) : Game::getLocalPlayer();
+	if (player == nullptr) {
+		return true;
+	}
+
+	return gamePaused ||
+	       player->updateLocked ||
+	       player->defeatedFlag ||
+	       player->actionFlag.cutsceneFreeze ||
+	       player->transitionState != &Player::defaultTransitState;
+}
+
 void SpookyController::onBlockHit() {
 	if (isSpooky) {
 		switchState(&SpookyController::transitionState);
@@ -181,6 +195,10 @@ void SpookyController::waitSpawnChaserState() {
 	}
 
 	if (updateStep == Func::Exit) {
+		return;
+	}
+
+	if (shouldPauseTimer()) {
 		return;
 	}
 
@@ -465,14 +483,16 @@ void SpookyController::stageSetup_hook() {
 }
 
 ncp_hook(0x020A2C88, 0)
-void SpookyController::stageUpdate_hook() {
+void SpookyController::stageUpdate_hook(void* stageScene) {
 	if (instance != nullptr){
+		instance->gamePaused = isStageScenePaused(stageScene);
 		instance->onUpdate();
 	}
 	// Do our setup in stageUpdate in MvsL
 	if (instance == nullptr && Game::vsMode){
 		instance = new SpookyController();
 		instance->onCreate();
+		instance->gamePaused = isStageScenePaused(stageScene);
 	}
 	
 }
@@ -787,6 +807,15 @@ static Player* getLeftmostPlayer() {
     }
 
     return leftmostPlayer;
+}
+
+static bool isStageScenePaused(void* stageScene) {
+	if (stageScene == nullptr) {
+		return false;
+	}
+
+	// StageScene::mainUpdateState switches the scene update state to 2 for the pause menu.
+	return *rcast<u32*>(rcast<u8*>(stageScene) + 0x63FC) == 2;
 }
 
 void SpookyController::lerpColor(GXRgb& color, GXRgb target, fx32 step) {

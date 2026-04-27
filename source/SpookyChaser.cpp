@@ -46,12 +46,15 @@ s32 Chaser::onCreate() {
 bool Chaser::updateMain() {
     spookyNsbtx.setTexture(texID);
     spookyNsbtx.setPalette(texID);
-    if(ctrl->deathTimer % 5 == 0){
+    bool timerPaused = ctrl->shouldPauseTimer();
+    if(!timerPaused && ctrl->deathTimer % 5 == 0){
         texID = (texID + 1) % 6;
     }
 	moveTowardsPlayer();
 
-    ctrl->deathTimer -= 1;
+    if (!timerPaused) {
+        ctrl->deathTimer -= 1;
+    }
 
     if (ctrl->deathTimer <= 0) {
         targetPlayer->damage(*this, 0, 0, PlayerDamageType::Death);

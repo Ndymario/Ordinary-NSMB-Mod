@@ -80,6 +80,7 @@ public:
 
 	void onBlockHit();
 	void queueWarpStatic(s32 delayFrames, s32 durationFrames);
+	bool shouldPauseTimer() const;
 	static void endLevel();
 	static void getOneLife_hook(s32 playerID);
 	static void playOneupSound(s32 sfxID, Vec3* pos);
@@ -89,7 +90,7 @@ public:
 
 	// Hooks
 	static void stageSetup_hook();
-	static void stageUpdate_hook();
+	static void stageUpdate_hook(void* stageScene);
 	static void stageRender_hook();
 	static void stageDestroy_hook();
 	static void trySpawnBattleStar_hook(Player* player, int isPlayerDead, int wasGroundPound);
@@ -114,6 +115,7 @@ public:
 	bool swapTarget = false;
 	u32 previousFlag = 0;
 	s32 currentTarget = 0;
+	bool gamePaused = false;
 
 	// Flag for the final boss stuff
 	bool finalBoss = false;
