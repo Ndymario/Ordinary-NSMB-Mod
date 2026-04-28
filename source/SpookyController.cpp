@@ -20,9 +20,11 @@ static void resetSpookyMusicTempo();
 static bool shouldResetSpookyMusicTempo();
 static s8 getLinkedPlayerID(PlayerBase* player);
 static bool isPlayerInMegaState(Player* player);
+static bool isPlayerInStarmanState(Player* player);
 
 static constexpr s32 defaultSpookTimer = 600;
 static constexpr s32 megaMushroomSpookTimer = defaultSpookTimer / 2;
+static constexpr s8 megaGrowingPowerupSwitchStep = 4;
 
 static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
 static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
@@ -39,11 +41,15 @@ void playPipeSfx_backup(PlayerBase* player, s32 sfxID, Vec3* pos);
 asm(R"(
 	GoalFlag_updateGoalGrab = 0x0213042C
 	func20BE084 = 0x020BE084
+	growToMega_backup = 0x02120344
+	applyStarman_backup = 0x0212B878
 )");
 
 extern "C" {
 	bool GoalFlag_updateGoalGrab(void* goal);
 	void func20BE084(void* stage);
+	void growToMega_backup(Player* player);
+	void applyStarman_backup(PlayerBase* player, u16 timer);
 }
 
 SpookyController* SpookyController::instance = nullptr;
@@ -188,6 +194,7 @@ bool SpookyController::shouldPauseTimer() const {
 	return gamePaused ||
 	       megaTimerPausePlayerID >= 0 ||
 	       isPlayerInMegaState(player) ||
+	       isPlayerInStarmanState(player) ||
 	       player->updateLocked ||
 	       player->defeatedFlag ||
 	       player->actionFlag.cutsceneFreeze ||
@@ -233,6 +240,7 @@ void SpookyController::logTimerState(const char* context) {
 	Player* player = Game::vsMode ? Game::getPlayer(currentTarget) : Game::getLocalPlayer();
 	s8 linkedPlayerID = getLinkedPlayerID(player);
 	s32 megaTimer = linkedPlayerID >= 0 ? Game::getMegaTimer(linkedPlayerID) : -1;
+	s32 starmanTimer = linkedPlayerID >= 0 ? Game::getStarmanTimer(linkedPlayerID) : -1;
 	Log() << "SPOOKY TIMER [" << context << "]"
 	      << " spook=" << spookTimer
 	      << " death=" << deathTimer
@@ -240,6 +248,7 @@ void SpookyController::logTimerState(const char* context) {
 	      << " megaPause=" << scast<s32>(megaTimerPausePlayerID)
 	      << " pid=" << scast<s32>(linkedPlayerID)
 	      << " megaTimer=" << megaTimer
+	      << " starmanTimer=" << starmanTimer
 	      << " powerup=" << (player != nullptr ? scast<s32>(player->currentPowerup) : -1)
 	      << " runtime=" << (player != nullptr ? scast<s32>(player->runtimePowerup) : -1)
 	      << "\n";
@@ -295,6 +304,15 @@ static bool isPlayerInMegaState(Player* player) {
 	return player->currentPowerup == PowerupState::Mega ||
 	       player->runtimePowerup == PowerupState::Mega ||
 	       (linkedPlayerID >= 0 && Game::getMegaTimer(linkedPlayerID) > 0);
+}
+
+static bool isPlayerInStarmanState(Player* player) {
+	if (player == nullptr) {
+		return false;
+	}
+
+	s8 linkedPlayerID = getLinkedPlayerID(player);
+	return linkedPlayerID >= 0 && Game::getStarmanTimer(linkedPlayerID) > 0;
 }
 
 void SpookyController::waitSpawnChaserState() {
@@ -692,10 +710,18 @@ void SpookyController::switchBrickTopCallback_hook(void* block, void* other) {
 	}
 }
 
-ncp_hook(0x021206E0, 10)
+ncp_call(0x021206E4, 10)
 void SpookyController::megaGrowStart_hook(Player* player) {
-	if (instance != nullptr) {
+	growToMega_backup(player);
+	if (instance != nullptr && player != nullptr && player->powerupSwitchStep == megaGrowingPowerupSwitchStep) {
 		instance->beginMegaTimerPause(player);
+	}
+}
+
+ncp_hook(0x0211FB38, 10)
+void SpookyController::megaGrowCancel_hook(Player* player, u32 frame) {
+	if (instance != nullptr) {
+		instance->endMegaTimerPause(player);
 	}
 }
 
@@ -845,6 +871,16 @@ bool SpookyController::applyPowerup_hook(PlayerBase* player, PowerupState poweru
 	} else {
 		return applyPowerup_backup(player, powerup);
 	}
+}
+
+ncp_call(0x020D484C, 10)
+void SpookyController::applyStarman_hook(PlayerBase* player, u16 timer)
+{
+	if (instance != nullptr && instance->isSpooky && !Game::vsMode && !instance->finalBoss){
+		instance->onBlockHit();
+		return;
+	}
+	applyStarman_backup(player, timer);
 }
 
 ncp_hook(0x021409B8, 28)	// Bowser Jr KO state

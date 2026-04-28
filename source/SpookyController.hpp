@@ -109,6 +109,7 @@ public:
 	static void switchBrickBottomCallback_hook(void* block);
 	static void switchBrickTopCallback_hook(void* block, void* other);
 	static void megaGrowStart_hook(Player* player);
+	static void megaGrowCancel_hook(Player* player, u32 frame);
 	static void megaTimerEnd_hook(Player* player);
 	static bool getCoin_hook(s32 playerID);
 	static void getScore_hook(s32 playerID, s32 count);
@@ -117,6 +118,7 @@ public:
 	static void oamLoad_hook();
 	static void doNotUpdateSomeDbObjPltt_hook(void* stage);
 	static bool applyPowerup_hook(PlayerBase* player, PowerupState powerup);
+	static void applyStarman_hook(PlayerBase* player, u16 timer);
 	static void startSeq_hook(s32 seqID, bool restart);
 	static void startStageThemeSeq_hook(s32 seqID);
 	static void playPipeSfx_hook(PlayerBase* player, s32 sfxID, Vec3* pos);
