@@ -3,10 +3,28 @@
 #include <nsmb/core/system/memory.hpp>
 #include <nsmb/core/filesystem/cache.hpp>
 #include <nsmb/extra/log.hpp>
+#include "SpookyResources.hpp"
 
 // Logging for debugging memory
 
 static u32 loadingFileID = 0;
+static bool optionalChaserResourceScope = false;
+
+extern "C" void MemoryDebug_setOptionalChaserResourceScope(bool enabled)
+{
+	optionalChaserResourceScope = enabled;
+}
+
+static bool isOptionalChaserResource(u32 extFileID)
+{
+	return extFileID == SpookyResources::bossChaserModelID ||
+	       extFileID == SpookyResources::bossChaserIdleAnimationID;
+}
+
+static bool shouldAllowOptionalChaserResourceFailure()
+{
+	return optionalChaserResourceScope && isOptionalChaserResource(loadingFileID);
+}
 
 asm(R"(
 .type FS_Cache_CacheEntry_loadFile_SUPER, %function
@@ -57,6 +75,12 @@ void* FS_Cache_CacheEntry_loadFile_OVERRIDE(FS::Cache::CacheEntry* self, u32 ext
 
 	if (scast<s32>(maxAllocateableSize - fileSize) < 0)
 	{
+		if (shouldAllowOptionalChaserResourceFailure())
+		{
+			Log() << "INFO: Optional chaser file " << getRealFileID(extFileID) << " skipped; needed " << fileSize << " bytes, " << maxAllocateableSize << " bytes free.\n";
+			return nullptr;
+		}
+
 		Log() << "ERROR: Could not load file with ID " << getRealFileID(extFileID) << " (" << fileSize << " bytes). " << maxAllocateableSize << " bytes free.\n";
 		OS_Terminate();
 	}
@@ -79,6 +103,12 @@ void* FS_Cache_CacheEntry_loadFileToOverlay_OVERRIDE(FS::Cache::CacheEntry* self
 
 	if (scast<s32>(FS::Cache::overlayFileSize - requiredSize) < 0)
 	{
+		if (shouldAllowOptionalChaserResourceFailure())
+		{
+			Log() << "INFO: Optional chaser file " << getRealFileID(extFileID) << " skipped for overlay; needed " << requiredSize << " bytes, " << FS::Cache::overlayFileSize << " bytes free.\n";
+			return nullptr;
+		}
+
 		Log() << "ERROR: Could not load file with ID " << getRealFileID(extFileID) << " (" << requiredSize << " bytes) to overlay. " << FS::Cache::overlayFileSize << " bytes free.\n";
 		OS_Terminate();
 	}
@@ -99,6 +129,12 @@ void* Heap_allocate_OVERRIDE(Heap* self, u32 size, int align)
 
 	if (!ptr && (self->flags & 0x4000) != 0)
 	{
+		if (shouldAllowOptionalChaserResourceFailure())
+		{
+			Log() << "INFO: Optional chaser resource allocation failed while loading file ID " << getRealFileID(loadingFileID) << ". Tried to allocate " << size << " bytes. " << self->vMaxAllocatableSize(align) << " bytes free.\n";
+			return nullptr;
+		}
+
 		Log() << "RAM: Out of memory. Tried to allocate " << size << " bytes. " << self->vMaxAllocatableSize(align) << " bytes free.\n";
 		Log() << "RAM: OOM while loading file ID " << getRealFileID(loadingFileID) << ".\n";
 		OS_Terminate();
@@ -261,6 +297,13 @@ BOOL FS_Cache_Internal_setup3DFile_AT_NNS_G3dResDefaultSetup_CALL(void* pResData
 
 	if (result == FALSE)
 	{
+		if (shouldAllowOptionalChaserResourceFailure())
+		{
+			Log() << "INFO: Optional chaser 3D setup failed for file ID " << getRealFileID(loadingFileID) << "; falling back to NSBTX.\n";
+			dump3DVramState();
+			return result;
+		}
+
 		Log() << "ERROR: Failed to setup 3D resource (File ID: " << getRealFileID(loadingFileID) << "), possibly no more VRAM free.\n";
 		dump3DVramState();
 		OS_Terminate();

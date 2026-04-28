@@ -1,14 +1,13 @@
 #pragma once
 
 #include "nsmb.hpp"
+#include "SpookyResources.hpp"
 
 class BlockProjectile;
 
 class SpookyBoss: public StageEntity3DAnm {
 private:
     // Model stuff
-    const static u32 bossModelID = 2089 - 131;
-    const static u32 idleAnimationID = 2093 - 131;
     Vec3 bossScale;
 
     u8 fightActivationRange = 8;

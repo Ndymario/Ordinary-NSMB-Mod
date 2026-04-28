@@ -3,16 +3,32 @@
 #include "nsmb.hpp"
 #include "nsmb_nitro.hpp"
 #include "NSBTX.hpp"
+#include "SpookyResources.hpp"
 
 class SpookyController;
 
 class Chaser: public StageEntity {
 private:
+    enum class RenderMode : u8 {
+        Model3D,
+        NsbtxFallback
+    };
+
 	SpookyController* ctrl;
 
+    ModelAnm* model = nullptr;
+    Vec3 modelScale = Vec3(1fx);
+    RenderMode renderMode = RenderMode::NsbtxFallback;
+
 	void moveTowardsPlayer();
+    bool isVisible() const;
+    bool canUseModelResources(bool& modelWasCached, bool& animationWasCached) const;
+    bool prepareModelResources();
+    void prepareNsbtxFallback();
+    void unloadFailedModelResources(bool modelWasCached, bool animationWasCached);
 
     fx32 playerBuffer = 40fx;
+    static constexpr u32 modelMemoryReserve = 96 * 1024;
 
 public:
     static bool loadResources();

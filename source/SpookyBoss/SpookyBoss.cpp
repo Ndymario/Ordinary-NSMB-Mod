@@ -14,8 +14,8 @@ SpookyBoss* SpookyBoss::instance = nullptr;
 bool SpookyBoss::fightOnSubScreen = false;
 
 bool SpookyBoss::loadResources() {
-    FS::Cache::loadFile(bossModelID, false);
-    FS::Cache::loadFile(idleAnimationID, false);
+    FS::Cache::loadFile(SpookyResources::bossChaserModelID, false);
+    FS::Cache::loadFile(SpookyResources::bossChaserIdleAnimationID, false);
     return true;
 }
 
@@ -38,8 +38,8 @@ s32 SpookyBoss::onCreate(){
 
     loadResources();
 
-    void* bossModelFile = FS::Cache::getFile(bossModelID);
-    void* idleAnmFile = FS::Cache::getFile(idleAnimationID);
+    void* bossModelFile = FS::Cache::getFile(SpookyResources::bossChaserModelID);
+    void* idleAnmFile = FS::Cache::getFile(SpookyResources::bossChaserIdleAnimationID);
 
     model.create(bossModelFile, idleAnmFile, 0, 0, 0);
 

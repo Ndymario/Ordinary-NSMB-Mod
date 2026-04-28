@@ -2,6 +2,7 @@
 
 #include "nsmb/extra/log.hpp"
 #include "nsmb/core/system/function.hpp"
+#include "SpookyResources.hpp"
 
 using namespace Lighting;
 
@@ -59,7 +60,7 @@ SpookyController* SpookyController::getInstance() {
 }
 
 void SpookyController::onPrepareResources() {
-	void* nsbtxFile = FS::Cache::loadFile(2090 - 131, false);
+	void* nsbtxFile = FS::Cache::loadFile(SpookyResources::staticNsbtxID, false);
 	staticNsbtx.setup(nsbtxFile, Vec2(64, 64), Vec2(0, 0), 0, 0);
 }
 
