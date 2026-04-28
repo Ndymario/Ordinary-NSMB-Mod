@@ -1,5 +1,6 @@
 #include "SpookyController.hpp"
 
+#include "nsmb/extra/log.hpp"
 #include "nsmb/core/system/function.hpp"
 
 using namespace Lighting;
@@ -11,6 +12,17 @@ static u16 makeMonochrome(u16 color);
 static void makeRangeMonochrome(u16* startAddr, u32 count);
 static Player* getLeftmostPlayer();
 static bool isStageScenePaused(void* stageScene);
+static void disableSpookyForBlockInteraction();
+static void disableSpookyForSwitchBrickBlock(void* block);
+static bool isGroundPoundingPlayer(void* actor);
+static bool isTargetSwitchBrickBlock(void* block);
+static void resetSpookyMusicTempo();
+static bool shouldResetSpookyMusicTempo();
+static s8 getLinkedPlayerID(PlayerBase* player);
+static bool isPlayerInMegaState(Player* player);
+
+static constexpr s32 defaultSpookTimer = 600;
+static constexpr s32 megaMushroomSpookTimer = defaultSpookTimer / 2;
 
 static void lerpColor(GXRgb& color, GXRgb target, fx32 step);
 static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
@@ -54,6 +66,8 @@ void SpookyController::onCreate() {
 	staticDelay = 0;
 	staticDurationQueued = 0;
 	warpStaticActive = false;
+	megaTimerPausePlayerID = -1;
+	timerLogCooldown = 0;
 
 	paletteBackup = new u16[256 + (256 * 16) + (256 * 32) + 256 + 256 + 32768];
 
@@ -88,6 +102,7 @@ void SpookyController::onUpdate() {
 	if (!doTicks && !isRenderingStatic) {
 		return;
 	}
+	logTimerState("pre-update");
 	updateFunc(this);
 
 	if (warpStaticActive &&
@@ -171,6 +186,8 @@ bool SpookyController::shouldPauseTimer() const {
 	}
 
 	return gamePaused ||
+	       megaTimerPausePlayerID >= 0 ||
+	       isPlayerInMegaState(player) ||
 	       player->updateLocked ||
 	       player->defeatedFlag ||
 	       player->actionFlag.cutsceneFreeze ||
@@ -183,9 +200,106 @@ void SpookyController::onBlockHit() {
 	}
 }
 
+void SpookyController::beginMegaTimerPause(Player* player) {
+	s8 linkedPlayerID = getLinkedPlayerID(player);
+	if (player == nullptr || (Game::vsMode && linkedPlayerID != currentTarget)) {
+		return;
+	}
+
+	megaTimerPausePlayerID = linkedPlayerID;
+	if (updateFunc == ptmf_cast(&SpookyController::waitSpawnChaserState)) {
+		spookTimer = megaMushroomSpookTimer;
+	}
+	timerLogCooldown = 0;
+	logTimerState("mega-start");
+}
+
+void SpookyController::endMegaTimerPause(Player* player) {
+	s8 linkedPlayerID = getLinkedPlayerID(player);
+	if (player == nullptr || linkedPlayerID == megaTimerPausePlayerID) {
+		timerLogCooldown = 0;
+		logTimerState("mega-end");
+		megaTimerPausePlayerID = -1;
+	}
+}
+
+void SpookyController::logTimerState(const char* context) {
+#ifdef NTR_DEBUG
+	if (timerLogCooldown > 0) {
+		timerLogCooldown--;
+		return;
+	}
+
+	Player* player = Game::vsMode ? Game::getPlayer(currentTarget) : Game::getLocalPlayer();
+	s8 linkedPlayerID = getLinkedPlayerID(player);
+	s32 megaTimer = linkedPlayerID >= 0 ? Game::getMegaTimer(linkedPlayerID) : -1;
+	Log() << "SPOOKY TIMER [" << context << "]"
+	      << " spook=" << spookTimer
+	      << " death=" << deathTimer
+	      << " paused=" << shouldPauseTimer()
+	      << " megaPause=" << scast<s32>(megaTimerPausePlayerID)
+	      << " pid=" << scast<s32>(linkedPlayerID)
+	      << " megaTimer=" << megaTimer
+	      << " powerup=" << (player != nullptr ? scast<s32>(player->currentPowerup) : -1)
+	      << " runtime=" << (player != nullptr ? scast<s32>(player->runtimePowerup) : -1)
+	      << "\n";
+
+	timerLogCooldown = 60;
+#endif
+}
+
+static void disableSpookyForBlockInteraction() {
+	if (SpookyController::instance != nullptr && !Game::vsMode && !Stage::challengeModeEnabled) {
+		SpookyController::instance->onBlockHit();
+	}
+}
+
+static void disableSpookyForSwitchBrickBlock(void* block) {
+	if (isTargetSwitchBrickBlock(block)) {
+		disableSpookyForBlockInteraction();
+	}
+}
+
+static bool isGroundPoundingPlayer(void* actor) {
+	return *rcast<u8*>(rcast<u8*>(actor) + 0x11C) == scast<u8>(ActorType::Player) &&
+	       (*rcast<u32*>(rcast<u8*>(actor) + 0x778) & 0x800000) != 0;
+}
+
+static bool isTargetSwitchBrickBlock(void* block) {
+	u16 id = rcast<Base*>(block)->id;
+	return id == 243 || id == 245 || id == 247;
+}
+
+static void resetSpookyMusicTempo() {
+	SND::Internal::hurryUpTempo = false;
+	SND::setTempoRatio(0x100);
+}
+
+static bool shouldResetSpookyMusicTempo() {
+	return ((*rcast<s32*>(0x020CA8B4) + 0xFFF) >> 12) > 100;
+}
+
+static s8 getLinkedPlayerID(PlayerBase* player) {
+	if (player == nullptr) {
+		return -1;
+	}
+	return *rcast<s8*>(rcast<u8*>(player) + 0x11E);
+}
+
+static bool isPlayerInMegaState(Player* player) {
+	if (player == nullptr) {
+		return false;
+	}
+
+	s8 linkedPlayerID = getLinkedPlayerID(player);
+	return player->currentPowerup == PowerupState::Mega ||
+	       player->runtimePowerup == PowerupState::Mega ||
+	       (linkedPlayerID >= 0 && Game::getMegaTimer(linkedPlayerID) > 0);
+}
+
 void SpookyController::waitSpawnChaserState() {
 	if (updateStep == Func::Init) {
-		spookTimer = 600;
+		spookTimer = defaultSpookTimer;
 		updateStep = 1;
 		return;
 	}
@@ -264,6 +378,7 @@ void SpookyController::transitionState() {
 			
 			if(!Game::vsMode){
 				StageView* view = StageView::get(Game::getLocalPlayer()->viewID, nullptr);
+				resetSpookyMusicTempo();
 				SND::pauseBGM(false);
 				if(!Game::getLocalPlayer()->defeatedFlag){
 					if(Entrance::getEntranceSpawnType(0) == PlayerSpawnType::TransitNormal){
@@ -482,6 +597,13 @@ void SpookyController::stageSetup_hook() {
 	}
 }
 
+ncp_hook(0x0215ECD4, 54)
+void SpookyController::stageSetupMusicTempo_hook() {
+	if (shouldResetSpookyMusicTempo()) {
+		resetSpookyMusicTempo();
+	}
+}
+
 ncp_hook(0x020A2C88, 0)
 void SpookyController::stageUpdate_hook(void* stageScene) {
 	if (instance != nullptr){
@@ -516,8 +638,71 @@ void SpookyController::stageDestroy_hook() {
 
 ncp_hook(0x0209E7D0, 0)
 void SpookyController::hitBlock_hook() {
-	if (instance != nullptr && !Game::vsMode && !Stage::challengeModeEnabled) {
-		instance->onBlockHit();
+	disableSpookyForBlockInteraction();
+}
+
+ncp_hook(0x0209E660, 0)
+void SpookyController::breakDestroyBlock_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_set_hook(0x0215A338, 54, SpookyController::flyingBlockActivate_hook);
+ncp_set_hook(0x0215BE38, 54, SpookyController::flyingBlockActivate_hook);
+void SpookyController::flyingBlockActivate_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_hook(0x0215B024, 54)
+void SpookyController::flyingBlockActivateImmediate_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_hook(0x0215CB1C, 54)
+void SpookyController::redFlyingBlockActivateImmediate_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_set_hook(0x02158F58, 54, SpookyController::rotatingBlockActivate_hook);
+ncp_set_hook(0x0215901C, 54, SpookyController::rotatingBlockActivate_hook);
+void SpookyController::rotatingBlockActivate_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_set_hook(0x02158404, 54, SpookyController::rouletteBlockActivate_hook);
+void SpookyController::rouletteBlockActivate_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_set_hook(0x02186014, 98, SpookyController::hangingBlockActivate_hook);
+ncp_set_hook(0x02187248, 98, SpookyController::hangingBlockActivate_hook);
+ncp_set_hook(0x02187314, 98, SpookyController::hangingBlockActivate_hook);
+void SpookyController::hangingBlockActivate_hook() {
+	disableSpookyForBlockInteraction();
+}
+
+ncp_hook(0x0216B798, 54)
+void SpookyController::switchBrickBottomCallback_hook(void* block) {
+	disableSpookyForSwitchBrickBlock(block);
+}
+
+ncp_hook(0x0216B7B8, 54)
+void SpookyController::switchBrickTopCallback_hook(void* block, void* other) {
+	if (isGroundPoundingPlayer(other)) {
+		disableSpookyForSwitchBrickBlock(block);
+	}
+}
+
+ncp_hook(0x021206E0, 10)
+void SpookyController::megaGrowStart_hook(Player* player) {
+	if (instance != nullptr) {
+		instance->beginMegaTimerPause(player);
+	}
+}
+
+ncp_hook(0x02120618, 10)
+void SpookyController::megaTimerEnd_hook(Player* player) {
+	if (instance != nullptr) {
+		instance->endMegaTimerPause(player);
 	}
 }
 

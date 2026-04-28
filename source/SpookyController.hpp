@@ -79,6 +79,9 @@ public:
 	static void lerpLighting(StageLighting& current, const StageLighting& target, fx32 step);
 
 	void onBlockHit();
+	void beginMegaTimerPause(Player* player);
+	void endMegaTimerPause(Player* player);
+	void logTimerState(const char* context);
 	void queueWarpStatic(s32 delayFrames, s32 durationFrames);
 	bool shouldPauseTimer() const;
 	static void endLevel();
@@ -90,11 +93,23 @@ public:
 
 	// Hooks
 	static void stageSetup_hook();
+	static void stageSetupMusicTempo_hook();
 	static void stageUpdate_hook(void* stageScene);
 	static void stageRender_hook();
 	static void stageDestroy_hook();
 	static void trySpawnBattleStar_hook(Player* player, int isPlayerDead, int wasGroundPound);
 	static void hitBlock_hook();
+	static void breakDestroyBlock_hook();
+	static void flyingBlockActivate_hook();
+	static void flyingBlockActivateImmediate_hook();
+	static void redFlyingBlockActivateImmediate_hook();
+	static void rotatingBlockActivate_hook();
+	static void rouletteBlockActivate_hook();
+	static void hangingBlockActivate_hook();
+	static void switchBrickBottomCallback_hook(void* block);
+	static void switchBrickTopCallback_hook(void* block, void* other);
+	static void megaGrowStart_hook(Player* player);
+	static void megaTimerEnd_hook(Player* player);
 	static bool getCoin_hook(s32 playerID);
 	static void getScore_hook(s32 playerID, s32 count);
 	static bool goalGrab_hook(void* goal);
@@ -116,6 +131,8 @@ public:
 	u32 previousFlag = 0;
 	s32 currentTarget = 0;
 	bool gamePaused = false;
+	s8 megaTimerPausePlayerID = -1;
+	s32 timerLogCooldown = 0;
 
 	// Flag for the final boss stuff
 	bool finalBoss = false;
